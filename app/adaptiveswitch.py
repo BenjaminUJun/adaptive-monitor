@@ -3,11 +3,12 @@ from ryu.controller import ofp_event
 from ryu.controller.handler import CONFIG_DISPATCHER, MAIN_DISPATCHER
 from ryu.controller.handler import set_ev_cls
 from ryu.ofproto import ofproto_v1_3
+from ryu.ofproto import ofproto_v1_3_parser
+from ryu.lib import ofctl_v1_3
 from ryu.lib.packet import packet
 from ryu.lib.packet import ethernet
-from ryu.lib import ofctl_v1_3
 from ryu.lib.packet import ipv4
-
+from ryu.tests.integrated import tester
 
 class AdaptiveSwitch(app_manager.RyuApp):
     OFP_VERSIONS = [ofproto_v1_3.OFP_VERSION]
@@ -17,6 +18,16 @@ class AdaptiveSwitch(app_manager.RyuApp):
         self.mac_to_port = {}
         self.portlist = []
         self.maclist = []
+        self.iplist = []
+
+    def ipv4_to_int(self, string):
+        ip = string.split('.')
+        assert len(ip) == 4
+        i = 0
+        for b in ip:
+            b = int(b)
+            i = (i << 8) | b
+        return i
 
     @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
     def switch_features_handler(self, ev):
@@ -26,12 +37,14 @@ class AdaptiveSwitch(app_manager.RyuApp):
 
         # install table-miss flow entry for all tables
         match_empty = parser.OFPMatch()
-        inst = [parser.OFPInstructionGotoTable(1)]
-        self.add_flow(datapath, 0, 0, match_empty, inst)
-        
-        match_ip = parser.OFPMatch(ipv4_src=ofctl_v1_3.to_match_ip('10.10.10.1/24'))
         actions = [parser.OFPActionOutput(3)]
-        inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)]
+###        inst = [parser.OFPInstructionGotoTable(1), parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS,actions)]
+###        self.add_flow(datapath, 0, 0, match_empty, inst)
+        
+        ###match_ip = parser.OFPMatch(ipv4_src=(self.ipv4_to_int('10.10.10.1')))
+        match_ip = parser.OFPMatch(eth_type=0x800, ipv4_src=('10.10.10.1'))
+        
+        inst = [parser.OFPInstructionGotoTable(1), parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)]
         self.add_flow(datapath, 0, 3, match_ip, inst)
 
         inst = [parser.OFPInstructionGotoTable(2)]
