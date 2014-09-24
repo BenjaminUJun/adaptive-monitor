@@ -20,14 +20,14 @@ class AdaptiveSwitch(app_manager.RyuApp):
         self.maclist = []
         self.iplist = []
 
-    def ipv4_to_int(self, string):
-        ip = string.split('.')
-        assert len(ip) == 4
-        i = 0
-        for b in ip:
-            b = int(b)
-            i = (i << 8) | b
-        return i
+###    def ipv4_to_int(self, string):
+###        ip = string.split('.')
+###        assert len(ip) == 4
+###        i = 0
+###        for b in ip:
+###            b = int(b)
+###            i = (i << 8) | b
+###        return i
 
     @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
     def switch_features_handler(self, ev):
@@ -38,12 +38,10 @@ class AdaptiveSwitch(app_manager.RyuApp):
         # install table-miss flow entry for all tables
         match_empty = parser.OFPMatch()
         actions = [parser.OFPActionOutput(3)]
-###        inst = [parser.OFPInstructionGotoTable(1), parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS,actions)]
-###        self.add_flow(datapath, 0, 0, match_empty, inst)
+        inst = [parser.OFPInstructionGotoTable(1)]
+        self.add_flow(datapath, 0, 0, match_empty, inst)
         
-        ###match_ip = parser.OFPMatch(ipv4_src=(self.ipv4_to_int('10.10.10.1')))
-        match_ip = parser.OFPMatch(eth_type=0x800, ipv4_src=('10.10.10.1'))
-        
+        match_ip = parser.OFPMatch(eth_type=0x800, ipv4_src=('10.0.0.1'))
         inst = [parser.OFPInstructionGotoTable(1), parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)]
         self.add_flow(datapath, 0, 3, match_ip, inst)
 

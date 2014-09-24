@@ -20,7 +20,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
             if not datapath.id in self.datapaths:
                 self.logger.debug('register datapath: %16x', datapath.id)
                 self.datapaths[datapath.id] = datapath
-        elif ev.state == DEAT_DISPATCHER:
+        elif ev.state == DEAD_DISPATCHER:
             if datapath.id in self.datapaths:
                 self.logger.debug('unregister datapath: %16x', datapath.id)
                 del self.datapaths[datapath.id]
