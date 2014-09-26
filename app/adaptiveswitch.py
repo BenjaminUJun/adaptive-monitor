@@ -37,11 +37,11 @@ class AdaptiveSwitch(app_manager.RyuApp):
 
         # install table-miss flow entry for all tables
         match_empty = parser.OFPMatch()
-        actions = [parser.OFPActionOutput(3)]
+        actions = [parser.OFPActionOutput(1)]
         inst = [parser.OFPInstructionGotoTable(1)]
         self.add_flow(datapath, 0, 0, match_empty, inst)
         
-        match_ip = parser.OFPMatch(eth_type=0x800, ipv4_src=('10.0.0.1'))
+        match_ip = parser.OFPMatch(eth_type=0x800, ipv4_src=('10.10.10.1'))
         inst = [parser.OFPInstructionGotoTable(1), parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)]
         self.add_flow(datapath, 0, 3, match_ip, inst)
 
