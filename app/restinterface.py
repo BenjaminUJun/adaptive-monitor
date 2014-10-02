@@ -2,7 +2,8 @@ import json
 import logging
 import adaptivemonitor
 
-from ryu.app import simple_switch_13 from webob import Response
+from ryu.app import simple_switch_13
+from webob import Response
 from ryu.controller import ofp_event
 from ryu.controller.handler import CONFIG_DISPATCHER
 from ryu.controller.handler import set_ev_cls
@@ -15,14 +16,14 @@ url = '/simpleswitch/mactable/{dpid}'
 class SimpleSwitchRest13(adaptivemonitor.AdaptiveMonitor):
 	_CONTEXTS = { 'wsgi': WSGIApplication }
 	def __init__(self, *args, **kwargs):
-		super(AdaptiveMonitor, self).__init__(*args, **kwargs)
+		super(SimpleSwitchRest13, self).__init__(*args, **kwargs)
 		self.switches = {}
 		wsgi = kwargs['wsgi']
 		wsgi.register(SimpleSwitchController, {simple_switch_instance_name : self})
 
 	@set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
 	def switch_features_handler(self, ev):
-		super(AdaptiveMonitor, self).switch_features_handler(ev)
+		super(SimpleSwitchRest13, self).switch_features_handler(ev)
 		datapath = ev.msg.datapath
 		self.switches[datapath.id] = datapath
 		self.mac_to_port.setdefault(datapath.id, {})
@@ -36,18 +37,15 @@ class SimpleSwitchRest13(adaptivemonitor.AdaptiveMonitor):
 			parser = datapath.ofproto_parser
 			if entry_port not in mac_table.values():
 				for mac, port in mac_table.items():
-
-				# from known device to new device
-				actions = [parser.OFPActionOutput(entry_port)]
-				match = parser.OFPMatch(in_port=port, eth_dst=entry_mac)
-				self.add_flow(datapath, 1, match, actions)
-
-				# from new device to known device
-				actions = [parser.OFPActionOutput(port)]
-				match = parser.OFPMatch(in_port=entry_port, eth_dst=mac)
-				self.add_flow(datapath, 1, match, actions)
-
-			mac_table.update({entry_mac : entry_port})
+					# from known device to new device
+					actions = [parser.OFPActionOutput(entry_port)]
+					match = parser.OFPMatch(in_port=port, eth_dst=entry_mac)
+					self.add_flow(datapath, 1, match, actions)
+					# from new device to known device
+					actions = [parser.OFPActionOutput(port)]
+					match = parser.OFPMatch(in_port=entry_port, eth_dst=mac)
+					self.add_flow(datapath, 1, match, actions)
+				mac_table.update({entry_mac : entry_port})
 		return mac_table
 
 class SimpleSwitchController(ControllerBase):
