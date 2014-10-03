@@ -12,16 +12,13 @@ import adaptivemonitor
 
 simple_switch_instance_name = 'simple_switch_api_app'
 url = '/simpleswitch/mactable/{dpid}'
-###url = '/simpleswitch/mactable'
-###SWITCHID_PATTERN = dpid_lib.DPID_PATTERN + r'|all'
-_SWITCHID_LEN = 19
-SWITCHID_PATTERN = r'[0-9a-f]{%d}' % _SWITCHID_LEN + r'|all'
+SWITCHID_PATTERN = dpid_lib.DPID_PATTERN + r'|all'
 
 class SimpleSwitchRest13(adaptivemonitor.AdaptiveMonitor):
-    _CONTEXTS = { 'wsgi': WSGIApplication }
+    _CONTEXTS = {'wsgi' : WSGIApplication}
     def __init__(self, *args, **kwargs):
         super(SimpleSwitchRest13, self).__init__(*args, **kwargs)
-        self.switches = {}
+###        self.switches = {}
         wsgi = kwargs['wsgi']
         wsgi.register(SimpleSwitchController, {simple_switch_instance_name : self})
 
@@ -29,12 +26,7 @@ class SimpleSwitchRest13(adaptivemonitor.AdaptiveMonitor):
     def switch_features_handler(self, ev):
         super(SimpleSwitchRest13, self).switch_features_handler(ev)
         datapath = ev.msg.datapath
-        print "switch_features_handler\n"
-        print datapath
-        print "\n"
-        print datapath.id
-        print "\n"
-        self.switches[datapath.id] = datapath
+###        self.switches[datapath.id] = datapath
         self.mac_to_port.setdefault(datapath.id, {})
     
     def set_mac_to_port(self, dpid, entry):
