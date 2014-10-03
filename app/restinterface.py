@@ -1,7 +1,7 @@
 import json
 import logging
 
-from webob import Response
+from webob import Response, request
 from ryu.controller import ofp_event
 from ryu.controller.handler import CONFIG_DISPATCHER
 from ryu.controller.handler import set_ev_cls
@@ -11,8 +11,11 @@ from ryu.lib import dpid as dpid_lib
 import adaptivemonitor
 
 simple_switch_instance_name = 'simple_switch_api_app'
-###url = '/simpleswitch/mactable/{dpid}'
-url = '/simpleswitch/mactable'
+url = '/simpleswitch/mactable/{dpid}'
+###url = '/simpleswitch/mactable'
+###SWITCHID_PATTERN = dpid_lib.DPID_PATTERN + r'|all'
+_SWITCHID_LEN = 19
+SWITCHID_PATTERN = r'[0-9a-f]{%d}' % _SWITCHID_LEN + r'|all'
 
 class SimpleSwitchRest13(adaptivemonitor.AdaptiveMonitor):
     _CONTEXTS = { 'wsgi': WSGIApplication }
@@ -39,6 +42,7 @@ class SimpleSwitchRest13(adaptivemonitor.AdaptiveMonitor):
         datapath = self.switches.get(dpid)
         entry_port = entry['port']
         entry_mac = entry['mac']
+        
         if datapath is not None:
             parser = datapath.ofproto_parser
             if entry_port not in mac_table.values():
@@ -58,30 +62,32 @@ class SimpleSwitchController(ControllerBase):
     def __init__(self, req, link, data, **config):
         super(SimpleSwitchController, self).__init__(req, link, data, **config)
         self.simple_switch_spp = data[simple_switch_instance_name]
-    
-    @route('simpleswitch', url, methods=['GET'], requirements={'dpid': dpid_lib.DPID_PATTERN})
+        print "ssc_init\n"
+        print self.simple_switch_spp.mac_to_port
+        print 6790874762851226928 in self.simple_switch_spp.mac_to_port
+        print "\nssc_init_end\n"
+
+    @route('simpleswitch', url, methods=['GET'], requirements={'dpid': SWITCHID_PATTERN})
     def list_mac_table(self, req, **kwargs):
+        
         print "aaa"
         simple_switch = self.simple_switch_spp
      ###   dpid = dpid_lib.str_to_dpid(kwargs['dpid'])
         print "list"
         print simple_switch
         print "list_mac_table"
-        print mac_table
         print "\n"
 ###        if dpid not in simple_switch.mac_to_port:
 ###            return Response(status=404)
 
   ###      mac_table = simple_switch.mac_to_port.get(dpid, {})
         print "list_mac_table"
-        print mac_table
         print "\n"
      ###   body = json.dumps(mac_table)
-        print body
         print "\n"
-        return Response(content_type='application/json', body=body)
+   ###     return Response(content_type='application/json', body=body)
 
-    @route('simpleswitch', url, methods=['PUT'], requirements={'dpid': dpid_lib.DPID_PATTERN})
+    @route('simpleswitch', url, methods=['PUT'], requirements={'dpid': SWITCHID_PATTERN})
     def put_mac_table(self, req, **kwargs):
         print "bbb"
         simple_switch = self.simple_switch_spp
