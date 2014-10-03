@@ -11,7 +11,8 @@ from ryu.lib import dpid as dpid_lib
 import adaptivemonitor
 
 simple_switch_instance_name = 'simple_switch_api_app'
-url = '/simpleswitch/mactable/{dpid}'
+###url = '/simpleswitch/mactable/{dpid}'
+url = '/simpleswitch/mactable'
 
 class SimpleSwitchRest13(adaptivemonitor.AdaptiveMonitor):
     _CONTEXTS = { 'wsgi': WSGIApplication }
@@ -62,17 +63,20 @@ class SimpleSwitchController(ControllerBase):
     def list_mac_table(self, req, **kwargs):
         print "aaa"
         simple_switch = self.simple_switch_spp
-        dpid = dpid_lib.str_to_dpid(kwargs['dpid'])
+     ###   dpid = dpid_lib.str_to_dpid(kwargs['dpid'])
         print "list"
         print simple_switch
-        if dpid not in simple_switch.mac_to_port:
-            return Response(status=404)
-
-        mac_table = simple_switch.mac_to_port.get(dpid, {})
         print "list_mac_table"
         print mac_table
         print "\n"
-        body = json.dumps(mac_table)
+###        if dpid not in simple_switch.mac_to_port:
+###            return Response(status=404)
+
+  ###      mac_table = simple_switch.mac_to_port.get(dpid, {})
+        print "list_mac_table"
+        print mac_table
+        print "\n"
+     ###   body = json.dumps(mac_table)
         print body
         print "\n"
         return Response(content_type='application/json', body=body)
@@ -82,9 +86,17 @@ class SimpleSwitchController(ControllerBase):
         print "bbb"
         simple_switch = self.simple_switch_spp
         dpid = dpid_lib.str_to_dpid(kwargs['dpid'])
+        print"\ndpid = "
+        print dpid
+        print "\n"
         new_entry = eval(req.body)
         print "put"
         print simple_switch.mac_to_port
+
+        print "list_mac_table"
+        print mac_table
+        print "\n"
+
         if dpid not in simple_switch.mac_to_port:
             return Response(status=404)
 

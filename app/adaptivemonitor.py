@@ -55,7 +55,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
                         (stat.table_id, stat.duration_sec, stat.duration_nsec, stat.priority, stat.idle_timeout, stat.hard_timeout, stat.flags, stat.cookie, stat.packet_count, stat.byte_count, stat.match, stat.instructions))
 ###        print flows
 ###        print "\n\n"
-        self.logger.debug('FlowStats: %s', flows)
+####        self.logger.debug('FlowStats: %s', flows)
 ###        body = ev.msg.body
 ###        self.logger.info('datapath         in-port  eth-dst           out-port packets  bytes   ')
 ###        self.logger.info('---------------- -------- ----------------- -------- -------- --------')
@@ -76,7 +76,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
                          (stat.port_no, stat.rx_packets, stat.tx_packets, stat.rx_bytes, stat.tx_bytes, stat.rx_dropped, stat.tx_dropped, stat.rx_errors, stat.tx_errors, stat.rx_frame_err, stat.rx_over_err, stat.rx_crc_err, stat.collisions, stat.duration_sec, stat.duration_nsec))
 ###        print ports
 ###        print "\n\n"
-        self.logger.debug('PortStats: %s', ports)
+####        self.logger.debug('PortStats: %s', ports)
 ###        body = ev.msg.body
 ###        self.logger.info('datapath         port     rx-pkts  rx-bytes rx-error tx-pkts  tx-bytes tx-error')
 ###        self.logger.info('---------------- -------- -------- -------- -------- -------- -------- --------')
