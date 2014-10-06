@@ -27,7 +27,7 @@ class SimpleSwitchRest13(adaptivemonitor.AdaptiveMonitor):
         super(SimpleSwitchRest13, self).switch_features_handler(ev)
         datapath = ev.msg.datapath
 ###        self.switches[datapath.id] = datapath
-        self.mac_to_port.setdefault(datapath.id, {})
+###        self.mac_to_port.setdefault(datapath.id, {})
     
     def set_mac_to_port(self, dpid, entry):
         mac_table = self.mac_to_port.setdefault(dpid, {})

@@ -13,17 +13,6 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
         self.datapaths = {}
         self.monitor_thread = hub.spawn(self._monitor)
 
-    @set_ev_cls(ofp_event.EventOFPStateChange, [MAIN_DISPATCHER, DEAD_DISPATCHER])
-    def _state_change_handler(self, ev):
-        datapath = ev.datapath
-        if ev.state == MAIN_DISPATCHER:
-            if not datapath.id in self.datapaths:
-                self.logger.debug('register datapath: %16x', datapath.id)
-                self.datapaths[datapath.id] = datapath
-        elif ev.state == DEAD_DISPATCHER:
-            if datapath.id in self.datapaths:
-                self.logger.debug('unregister datapath: %16x', datapath.id)
-                del self.datapaths[datapath.id]
 
     def _monitor(self):
         while True:

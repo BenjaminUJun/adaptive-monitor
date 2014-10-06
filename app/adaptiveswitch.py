@@ -1,33 +1,41 @@
 from ryu.base import app_manager
 from ryu.controller import ofp_event
-from ryu.controller.handler import CONFIG_DISPATCHER, MAIN_DISPATCHER
-from ryu.controller.handler import set_ev_cls
-from ryu.ofproto import ofproto_v1_3
-from ryu.ofproto import ofproto_v1_3_parser
+from ryu.controller.handler import set_ev_cls, CONFIG_DISPATCHER, MAIN_DISPATCHER
+from ryu.ofproto import ofproto_v1_3, ofproto_v1_3_parser, ether
 from ryu.lib import ofctl_v1_3
-from ryu.lib.packet import packet
-from ryu.lib.packet import ethernet
-from ryu.lib.packet import ipv4
-from ryu.tests.integrated import tester
+from ryu.lib.packet import packet, ethernet, ipv4
 
 class AdaptiveSwitch(app_manager.RyuApp):
     OFP_VERSIONS = [ofproto_v1_3.OFP_VERSION]
 
     def __init__(self, *args, **kwargs):
         super(AdaptiveSwitch, self).__init__(*args, **kwargs)
+        self.datapaths = {}
         self.mac_to_port = {}
-        self.portlist = []
-        self.maclist = []
-        self.iplist = []
+        self.ports = {}
+        self.macs = {}
+        self.ips = {}
 
-###    def ipv4_to_int(self, string):
-###        ip = string.split('.')
-###        assert len(ip) == 4
-###        i = 0
-###        for b in ip:
-###            b = int(b)
-###            i = (i << 8) | b
-###        return i
+    @set_ev_cls(ofp_event.EventOFPStateChange, [MAIN_DISPATCHER, DEAD_DISPATCHER])
+    def _state_change_handler(self, ev):
+        datapath = ev.datapath
+        if ev.state == MAIN_DISPATCHER:
+            if not datapath.id in self.datapaths:
+                self.logger.info('register datapath: %16x', datapath.id)
+                self.datapaths[datapath.id] = datapath
+                self.mac_to_port.setdefault(datapath.id, {})
+                self.ports.setdefault(datapath.id, [])
+                self.macs.setdefault(datapath.id, [])
+                self.ips.setdefault(datapath.id, [])
+
+        elif ev.state == DEAD_DISPATCHER:
+            if datapath.id in self.datapaths:
+                self.logger.info('unregister datapath: %16x', datapath.id)
+                del self.datapaths[datapath.id]
+                del self.mac_to_port[datapath.id]
+                del self.ports[datapath.id]
+                del self.macs[datapath.id]
+                del self.ips[datapath.id]
 
     @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
     def switch_features_handler(self, ev):
@@ -35,13 +43,12 @@ class AdaptiveSwitch(app_manager.RyuApp):
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
 
-        # install table-miss flow entry for all tables
         match_empty = parser.OFPMatch()
         actions = [parser.OFPActionOutput(1)]
         inst = [parser.OFPInstructionGotoTable(1)]
         self.add_flow(datapath, 0, 0, match_empty, inst)
         
-        match_ip = parser.OFPMatch(eth_type=0x800, ipv4_src=('10.10.10.1'))
+        match_ip = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_src=('10.10.10.1'))
         inst = [parser.OFPInstructionGotoTable(1), parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)]
         self.add_flow(datapath, 0, 3, match_ip, inst)
 
@@ -66,35 +73,19 @@ class AdaptiveSwitch(app_manager.RyuApp):
         parser = datapath.ofproto_parser
         in_port = msg.match['in_port']
         
-#        pkt = packet.Packet(msg.data)
-#        eth = pkt.get_protocols(ethernet.ethernet)[0]
-#        dst = eth.dst
-#        src = eth.src
-
-        pkt = packet.Packet(msg.data)
-        pkt_ipv4 = pkt.get_protocol(ipv4.ipv4)
-        print pkt_ipv4
-    ### print src
-    ### print "\n"
-    ### print dst
-    ### print "\n"
-
         pkt = packet.Packet(msg.data)
         eth = pkt.get_protocols(ethernet.ethernet)[0]
-
         dst = eth.dst
         src = eth.src
+        pkt_ipv4 = pkt.get_protocol(ipv4.ipv4)
+        print pkt_ipv4
 
-        dpid = datapath.id
-        self.mac_to_port.setdefault(dpid, {})
+        self.logger.info("packet in %s %s %s %s", datapath.id, src, dst, in_port)
 
-        self.logger.info("packet in %s %s %s %s", dpid, src, dst, in_port)
+        self.mac_to_port[datapath.id][src] = in_port
 
-        # learn a mac address to avoid FLOOD next time.
-        self.mac_to_port[dpid][src] = in_port
-
-        if dst in self.mac_to_port[dpid]:
-            out_port = self.mac_to_port[dpid][dst]
+        if dst in self.mac_to_port[datapath.id]:
+            out_port = self.mac_to_port[datapath.id][dst]
         else:
             out_port = ofproto.OFPP_FLOOD
 
