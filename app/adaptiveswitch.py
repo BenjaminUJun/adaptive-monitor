@@ -82,10 +82,13 @@ class AdaptiveSwitch(app_manager.RyuApp):
         
         pkt = packet.Packet(msg.data)
         eth = pkt.get_protocol(ethernet.ethernet)
+        print type(eth)
+        print eth
         dst = eth.dst
         src = eth.src
         pkt_ipv4 = pkt.get_protocol(ipv4.ipv4)
         print type(pkt_ipv4)
+        print pkt_ipv4
         print pkt_ipv4.src
         print pkt_ipv4.dst
 #        print "pkt_ipv4 = ", utils.to_dict(pkt_ipv4)
