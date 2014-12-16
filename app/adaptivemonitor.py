@@ -63,6 +63,10 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
             print flow.match
             print hasattr(flow.match, 'in_port')
             print hasattr(flow.match, "eth_dst")
+            try:
+                print flow.match["in_port"]
+            except Exception as ex:
+                raise ex
 
         filter_flow_table = [flow for flow in body if hasattr(flow.match, 'in_port') and hasattr(flow.match, "eth_dst")]
         for stat in sorted(filter_flow_table, key=lambda f: (f.match['in_port'], f.match['eth_dst'])):
