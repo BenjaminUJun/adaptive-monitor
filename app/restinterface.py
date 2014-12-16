@@ -19,30 +19,29 @@ simple_switch_instance_name = 'simple_switch_api_app'
 url = '/simpleswitch/mactable/{dpid}'
 SWITCHID_PATTERN = dpid_lib.DPID_PATTERN + r'|all'
 
-class SimpleSwitchRest13(adaptivemonitor.AdaptiveMonitor):
+class SimpleSwitchRest(adaptivemonitor.AdaptiveMonitor):
+
     _CONTEXTS = {'wsgi' : WSGIApplication}
+
     def __init__(self, *args, **kwargs):
-        super(SimpleSwitchRest13, self).__init__(*args, **kwargs)
+        super(SimpleSwitchRest, self).__init__(*args, **kwargs)
 ###        self.switches = {}
         wsgi = kwargs['wsgi']
         wsgi.register(SimpleSwitchController, {simple_switch_instance_name : self})
 
     @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
     def switch_features_handler(self, ev):
-        super(SimpleSwitchRest13, self).switch_features_handler(ev)
-        datapath = ev.msg.datapath
-###        self.switches[datapath.id] = datapath
-###        self.mac_to_port.setdefault(datapath.id, {})
-    
+        super(SimpleSwitchRest, self).switch_features_handler(ev)
+
     def set_mac_to_port(self, datapathid, entry):
         mac_table = self.mac_to_port.setdefault(datapathid, {})
-        datapath = self.switches.get(datapathid)
+        datapath = self.datapath_list[datapathid]
         entry_port = entry['port']
         entry_mac = entry['mac']
         
         if datapath is not None:
             parser = datapath.ofproto_parser
-            if entry_port not in mac_table.values():
+            if not entry_port in mac_table.values():
                 for mac, port in mac_table.items():
                     # from known device to new device
                     actions = [parser.OFPActionOutput(entry_port)]
@@ -88,7 +87,7 @@ class SimpleSwitchController(ControllerBase):
     def put_mac_table(self, req, **kwargs):
         print "bbb"
         simple_switch = self.simple_switch_spp
-        datapathid = dpid.str_to_dpid(kwargs['dpid'])
+        datapathid = dpid_lib.str_to_dpid(kwargs['dpid'])
         print "\ndpid = "
         print datapathid
         print "\n"
@@ -97,7 +96,7 @@ class SimpleSwitchController(ControllerBase):
         print simple_switch.mac_to_port
 
         print "list_mac_table"
-        print mac_table
+        print self.mac_to_port[datapathid]
         print "\n"
 
         if datapathid not in simple_switch.mac_to_port:

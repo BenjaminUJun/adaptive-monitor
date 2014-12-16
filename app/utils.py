@@ -6,7 +6,7 @@ def to_string(obj):
     for k in dir(obj):
         type_k = str(eval("obj.%s.__class__" % k))
         if type_k not in ["<type 'NoneType'>", "<type 'instancemethod'>", "<type 'function'>"] and k != '__module__':
-            t_list.append("%s:%s\n" % (k, str(eval("obj.%s" % k))))
+            t_list.append("%s=%s " % (k, str(eval("obj.%s" % k))))
     return "".join(t_list)
 
 def to_dict(obj):
