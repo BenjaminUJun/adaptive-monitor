@@ -25,6 +25,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
 
     def _monitor(self):
         while True:
+            print "in _monitor function"
             for dp in self.datapaths.values():
                 self._request_stats(dp)
             hub.sleep(10)
