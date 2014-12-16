@@ -17,7 +17,8 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
 
     def __init__(self, *args, **kwargs):
         super(AdaptiveMonitor, self).__init__(*args, **kwargs)
-        self.datapaths = {}
+#        self.datapaths = {}
+        print "monitor starting..."
         self.monitor_thread = hub.spawn(self._monitor)
 
 
