@@ -42,7 +42,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
 
     @set_ev_cls(ofp_event.EventOFPFlowStatsReply, MAIN_DISPATCHER)
     def _flow_stats_reply_handler(self, ev):
-        super(AdaptiveMonitor, self)._state_change_handler(self, ev)
+        super(AdaptiveMonitor, self)._state_change_handler(ev)
 
         flows = []
         for stat in ev.msg.body:
