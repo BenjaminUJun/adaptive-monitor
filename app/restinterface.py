@@ -36,6 +36,10 @@ class SimpleSwitchRest(adaptivemonitor.AdaptiveMonitor):
     def set_mac_to_port(self, datapathid, entry):
         mac_table = self.mac_to_port.setdefault(datapathid, {})
         datapath = self.datapath_list[datapathid]
+
+        print "datapathid=", datapathid
+        print "datapath=", datapath
+
         entry_port = entry['port']
         entry_mac = entry['mac']
 
@@ -111,7 +115,7 @@ class SimpleSwitchController(ControllerBase):
             return Response(status=404)
 
         try:
-            print "dpid %16x", (datapathid,)
+            print "dpid %16x" % (datapathid,)
             print new_entry
             mac_table = simple_switch.set_mac_to_port(datapathid, new_entry)
             print "put_mac_table"
@@ -123,4 +127,5 @@ class SimpleSwitchController(ControllerBase):
             return Response(content_type='application/json', body=body)
         except Exception as e:
             print "exception"
+            print e
             return Response(status=500)
