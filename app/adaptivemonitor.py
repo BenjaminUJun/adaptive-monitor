@@ -67,11 +67,12 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
             try:
                 print "syccessful"
                 print flow.match["in_port"]
-                print flow.match["in_port"]
+                print flow.match["eth_dst"]
             except Exception as ex:
                 print flow.match
 
-        filter_flow_table = [flow for flow in body if hasattr(flow.match, 'in_port') and hasattr(flow.match, "eth_dst")]
+        filter_flow_table = [flow for flow in body if "in_port" in flow.match and "eth_dst" in flow.match]
+        print "filter_flow_table =", filter_flow_table
         for stat in sorted(filter_flow_table, key=lambda f: (f.match['in_port'], f.match['eth_dst'])):
             self.logger.info('%016x %8x %17s %8x %8d %8d', ev.msg.datapath.id, stat.match['in_port'], stat.match['eth_dst'], stat.instructions[0].actions[0].port, stat.packet_count, stat.byte_count)
 
