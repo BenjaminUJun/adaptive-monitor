@@ -1,6 +1,10 @@
+#!/usr/bin/env python2.7
+# -*- coding:utf-8 -*-
+
+
 from ryu.base import app_manager
 from ryu.controller import ofp_event
-from ryu.controller.handler import set_ev_cls, CONFIG_DISPATCHER, MAIN_DISPATCHER
+from ryu.controller.handler import set_ev_cls, CONFIG_DISPATCHER, MAIN_DISPATCHER, DEAD_DISPATCHER
 from ryu.ofproto import ofproto_v1_3, ofproto_v1_3_parser, ether
 from ryu.lib import ofctl_v1_3
 from ryu.lib.packet import packet, ethernet, ipv4
@@ -12,9 +16,6 @@ class AdaptiveSwitch(app_manager.RyuApp):
         super(AdaptiveSwitch, self).__init__(*args, **kwargs)
         self.datapaths = {}
         self.mac_to_port = {}
-        self.ports = {}
-        self.macs = {}
-        self.ips = {}
 
     @set_ev_cls(ofp_event.EventOFPStateChange, [MAIN_DISPATCHER, DEAD_DISPATCHER])
     def _state_change_handler(self, ev):
@@ -24,9 +25,6 @@ class AdaptiveSwitch(app_manager.RyuApp):
                 self.logger.info('register datapath: %16x', datapath.id)
                 self.datapaths[datapath.id] = datapath
                 self.mac_to_port.setdefault(datapath.id, {})
-                self.ports.setdefault(datapath.id, [])
-                self.macs.setdefault(datapath.id, [])
-                self.ips.setdefault(datapath.id, [])
 
         elif ev.state == DEAD_DISPATCHER:
             if datapath.id in self.datapaths:
@@ -101,6 +99,5 @@ class AdaptiveSwitch(app_manager.RyuApp):
         if msg.buffer_id == ofproto.OFP_NO_BUFFER:
             data = msg.data
 
-        out = parser.OFPPacketOut(datapath=datapath, buffer_id=msg.buffer_id,
-                                  in_port=in_port, actions=actions, data=data)
+        out = parser.OFPPacketOut(datapath=datapath, buffer_id=msg.buffer_id, in_port=in_port, actions=actions, data=data)
         datapath.send_msg(out)

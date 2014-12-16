@@ -1,3 +1,7 @@
+#!/usr/bin/env python2.7
+# -*- coding:utf-8 -*-
+
+
 from operator import attrgetter
 
 import adaptiveswitch
@@ -12,6 +16,9 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
         super(AdaptiveMonitor, self).__init__(*args, **kwargs)
         self.datapaths = {}
         self.monitor_thread = hub.spawn(self._monitor)
+        self.ports = {}
+        self.macs = {}
+        self.ips = {}
 
 
     def _monitor(self):
@@ -31,8 +38,23 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
         req = parser.OFPPortStatsRequest(datapath, 0, ofproto.OFPP_ANY)
         datapath.send_msg(req)
 
-    @set_ev_cls(ofp_event.EventOFPFlowStatsReply, MAIN_DISPATCHER)
+    @set_ev_cls(ofp_event.EventOFPFlowStatsReply, [MAIN_DISPATCHER, DEAD_DISPATCHER])
     def _flow_stats_reply_handler(self, ev):
+
+        datapath = ev.datapath
+        if ev.state == MAIN_DISPATCHER:
+            if not datapath.id in super.datapaths:
+                self.ports.setdefault(datapath.id, {})
+                self.macs.setdefault(datapath.id, {})
+                self.ips.setdefault(datapath.id, {})
+
+        elif ev.state == DEAD_DISPATCHER:
+            if datapath.id in super.datapaths:
+                del self.ports[datapath.id]
+                del self.macs[datapath.id]
+                del self.ips[datapath.id]
+
+
         flows = []
         for stat in ev.msg.body:
             flows.append('table_id=%s '

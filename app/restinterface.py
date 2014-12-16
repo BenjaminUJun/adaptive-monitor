@@ -1,3 +1,6 @@
+#!/usr/bin/env python2.7
+# -*- coding:utf-8 -*-
+
 import json
 import logging
 
@@ -29,9 +32,9 @@ class SimpleSwitchRest13(adaptivemonitor.AdaptiveMonitor):
 ###        self.switches[datapath.id] = datapath
 ###        self.mac_to_port.setdefault(datapath.id, {})
     
-    def set_mac_to_port(self, dpid, entry):
-        mac_table = self.mac_to_port.setdefault(dpid, {})
-        datapath = self.switches.get(dpid)
+    def set_mac_to_port(self, datapathid, entry):
+        mac_table = self.mac_to_port.setdefault(datapathid, {})
+        datapath = self.switches.get(datapathid)
         entry_port = entry['port']
         entry_mac = entry['mac']
         
@@ -59,20 +62,20 @@ class SimpleSwitchController(ControllerBase):
         print 6790874762851226928 in self.simple_switch_spp.mac_to_port
         print "\nssc_init_end\n"
 
-    @route('simpleswitch', url, methods=['GET'], requirements={'dpid': SWITCHID_PATTERN})
+    @route('simpleswitch', url, methods=['GET'], requirements={'datapathid': SWITCHID_PATTERN})
     def list_mac_table(self, req, **kwargs):
         
         print "aaa"
         simple_switch = self.simple_switch_spp
-     ###   dpid = dpid_lib.str_to_dpid(kwargs['dpid'])
+     ###   datapathid = dpid.str_to_dpid(kwargs['dpid'])
         print "list"
         print simple_switch
         print "list_mac_table"
         print "\n"
-###        if dpid not in simple_switch.mac_to_port:
+###        if datapathid not in simple_switch.mac_to_port:
 ###            return Response(status=404)
 
-  ###      mac_table = simple_switch.mac_to_port.get(dpid, {})
+  ###      mac_table = simple_switch.mac_to_port.get(datapathid, {})
         print "list_mac_table"
         print "\n"
      ###   body = json.dumps(mac_table)
@@ -83,9 +86,9 @@ class SimpleSwitchController(ControllerBase):
     def put_mac_table(self, req, **kwargs):
         print "bbb"
         simple_switch = self.simple_switch_spp
-        dpid = dpid_lib.str_to_dpid(kwargs['dpid'])
-        print"\ndpid = "
-        print dpid
+        datapathid = dpid.str_to_dpid(kwargs['dpid'])
+        print "\ndpid = "
+        print datapathid
         print "\n"
         new_entry = eval(req.body)
         print "put"
@@ -95,11 +98,11 @@ class SimpleSwitchController(ControllerBase):
         print mac_table
         print "\n"
 
-        if dpid not in simple_switch.mac_to_port:
+        if datapathid not in simple_switch.mac_to_port:
             return Response(status=404)
 
         try:
-            mac_table = simple_switch.set_mac_to_port(dpid, new_entry)
+            mac_table = simple_switch.set_mac_to_port(datapathid, new_entry)
             print "put_mac_table"
             print mac_table
             print "\n"
