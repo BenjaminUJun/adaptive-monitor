@@ -24,6 +24,7 @@ class SimpleSwitchRest(adaptivemonitor.AdaptiveMonitor):
     _CONTEXTS = {'wsgi' : WSGIApplication}
 
     def __init__(self, *args, **kwargs):
+        print "simplerest__init__"
         super(SimpleSwitchRest, self).__init__(*args, **kwargs)
 ###        self.switches = {}
         wsgi = kwargs['wsgi']
