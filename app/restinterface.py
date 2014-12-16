@@ -98,6 +98,7 @@ class SimpleSwitchController(ControllerBase):
         print datapathid
         print "\n"
         new_entry = eval(req.body)
+        print "new_entry=", new_entry
         print "put"
         print simple_switch.mac_to_port
 
@@ -105,7 +106,8 @@ class SimpleSwitchController(ControllerBase):
         print simple_switch.mac_to_port[datapathid]
         print "\n"
 
-        if datapathid not in simple_switch.mac_to_port:
+        if int('5e3e089e01a7de53', 16) not in simple_switch.mac_to_port:
+            print "404"
             return Response(status=404)
 
         try:
