@@ -18,7 +18,6 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
     def __init__(self, *args, **kwargs):
         print "simplesmonitor__init__"
         super(AdaptiveMonitor, self).__init__(*args, **kwargs)
-        self.datapaths = {}
         print "monitor starting..."
         self.monitor_thread = hub.spawn(self._monitor)
 
@@ -26,7 +25,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
     def _monitor(self):
         while True:
             print "in _monitor function"
-            for dp in self.datapaths.values():
+            for dp in self.datapath_list.values():
                 self._request_stats(dp)
             hub.sleep(10)
 
