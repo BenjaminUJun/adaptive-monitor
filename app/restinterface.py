@@ -58,7 +58,7 @@ class SimpleSwitchRest(adaptivemonitor.AdaptiveMonitor):
                     actions = [parser.OFPActionOutput(port)]
                     match = parser.OFPMatch(in_port=entry_port, eth_dst=mac)
                     self.add_flow(datapath, 2, 2, match, actions)
-                mac_table.update({entry_mac : entry_port})
+                mac_table.update({entry_mac: entry_port})
         print mac_table
         return mac_table
 
@@ -128,4 +128,5 @@ class SimpleSwitchController(ControllerBase):
         except Exception as e:
             print "exception"
             print e
+            raise e
             return Response(status=500)
