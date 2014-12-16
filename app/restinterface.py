@@ -36,6 +36,7 @@ class SimpleSwitchRest(adaptivemonitor.AdaptiveMonitor):
     def set_mac_to_port(self, datapathid, entry):
         mac_table = self.mac_to_port.setdefault(datapathid, {})
         datapath = self.datapath_list[datapathid]
+        ofproto = datapath.ofproto
 
         print "datapathid=", datapathid
         print "datapath=", datapath
@@ -52,12 +53,14 @@ class SimpleSwitchRest(adaptivemonitor.AdaptiveMonitor):
                 for mac, port in mac_table.items():
                     # from known device to new device
                     actions = [parser.OFPActionOutput(entry_port)]
+                    inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)]
                     match = parser.OFPMatch(in_port=port, eth_dst=entry_mac)
-                    self.add_flow(datapath, 2, 2, match, actions)
+                    self.add_flow(datapath, 2, 2, match, inst)
                     # from new device to known device
                     actions = [parser.OFPActionOutput(port)]
+                    inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)]
                     match = parser.OFPMatch(in_port=entry_port, eth_dst=mac)
-                    self.add_flow(datapath, 2, 2, match, actions)
+                    self.add_flow(datapath, 2, 2, match, inst)
                 mac_table.update({entry_mac: entry_port})
         print mac_table
         return mac_table
