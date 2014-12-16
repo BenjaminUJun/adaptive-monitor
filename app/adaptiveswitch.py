@@ -19,6 +19,9 @@ class AdaptiveSwitch(app_manager.RyuApp):
         super(AdaptiveSwitch, self).__init__(*args, **kwargs)
         self.datapath_list = {}
         self.mac_to_port = {}
+        self.port_list = {}
+        self.mac_list = {}
+        self.ip_list = {}
 
     @set_ev_cls(ofp_event.EventOFPStateChange, [MAIN_DISPATCHER, DEAD_DISPATCHER])
     def _state_change_handler(self, ev):
