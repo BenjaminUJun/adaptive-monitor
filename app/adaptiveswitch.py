@@ -9,6 +9,9 @@ from ryu.ofproto import ofproto_v1_3, ofproto_v1_3_parser, ether
 from ryu.lib import ofctl_v1_3
 from ryu.lib.packet import packet, ethernet, ipv4
 
+import utils
+
+
 class AdaptiveSwitch(app_manager.RyuApp):
     OFP_VERSIONS = [ofproto_v1_3.OFP_VERSION]
 
@@ -24,16 +27,16 @@ class AdaptiveSwitch(app_manager.RyuApp):
             if not datapath.id in self.datapaths:
                 self.logger.info('register datapath: %16x', datapath.id)
                 self.datapaths[datapath.id] = datapath
-                self.mac_to_port.setdefault(datapath.id, {})
+                self.mac_to_port[datapath.id] = {}
 
         elif ev.state == DEAD_DISPATCHER:
             if datapath.id in self.datapaths:
                 self.logger.info('unregister datapath: %16x', datapath.id)
                 del self.datapaths[datapath.id]
                 del self.mac_to_port[datapath.id]
-                del self.ports[datapath.id]
-                del self.macs[datapath.id]
-                del self.ips[datapath.id]
+#                del self.ports[datapath.id]
+#                del self.macs[datapath.id]
+#                del self.ips[datapath.id]
 
     @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
     def switch_features_handler(self, ev):
@@ -72,11 +75,11 @@ class AdaptiveSwitch(app_manager.RyuApp):
         in_port = msg.match['in_port']
         
         pkt = packet.Packet(msg.data)
-        eth = pkt.get_protocols(ethernet.ethernet)[0]
+        eth = pkt.get_protocol(ethernet.ethernet)
         dst = eth.dst
         src = eth.src
         pkt_ipv4 = pkt.get_protocol(ipv4.ipv4)
-        print pkt_ipv4
+        print "pkt_ipv4 = ", pkt_ipv4
 
         self.logger.info("packet in %s %s %s %s", datapath.id, src, dst, in_port)
 
