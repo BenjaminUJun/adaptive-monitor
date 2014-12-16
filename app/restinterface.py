@@ -97,7 +97,7 @@ class SimpleSwitchController(ControllerBase):
         print "put"
         print simple_switch.mac_to_port
 
-        print "list_mac_table222"
+        print "list_mac_table"
         print simple_switch.mac_to_port[datapathid]
         print "\n"
 
