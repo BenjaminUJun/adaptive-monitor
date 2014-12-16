@@ -57,7 +57,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
         body = ev.msg.body
         self.logger.info('datapath         in-port  eth-dst           out-port packets  bytes   ')
         self.logger.info('---------------- -------- ----------------- -------- -------- --------')
-        filter_flow_table = [flow for flow in body if flow.match.hasattr('inport') and flow.match.hasattr("eth_dst")]
+        filter_flow_table = [flow for flow in body if hasattr(flow.match, 'in_port') and hasattr(flow.match, "eth_dst")]
         for stat in sorted(filter_flow_table, key=lambda f: (f.match['in_port'], f.match['eth_dst'])):
             self.logger.info('%016x %8x %17s %8x %8d %8d', ev.msg.datapath.id, stat.match['in_port'], stat.match['eth_dst'], stat.instructions[0].actions[0].port, stat.packet_count, stat.byte_count)
 
