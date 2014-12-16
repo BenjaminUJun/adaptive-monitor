@@ -114,7 +114,8 @@ class SimpleSwitchController(ControllerBase):
             print "404"
             return Response(status=404)
 
-        try:
+#        try:
+        if True:
             print "dpid %16x" % (datapathid,)
             print new_entry
             mac_table = simple_switch.set_mac_to_port(datapathid, new_entry)
@@ -125,8 +126,8 @@ class SimpleSwitchController(ControllerBase):
             print body
             print "\n"
             return Response(content_type='application/json', body=body)
-        except Exception as e:
-            print "exception"
-            print e
-            raise e
-            return Response(status=500)
+#        except Exception as e:
+#            print "exception"
+#            print e
+#            raise e
+#            return Response(status=500)
