@@ -61,6 +61,8 @@ class SimpleSwitchController(ControllerBase):
         print "ssc_init\n"
         print self.simple_switch_spp.mac_to_port
         print 6790874762851226928 in self.simple_switch_spp.mac_to_port
+        print int('5e3e089e01a7de53', 16) in self.simple_switch_spp.mac_to_port
+
         print "\nssc_init_end\n"
 
     @route('simpleswitch', url, methods=['GET'], requirements={'datapathid': SWITCHID_PATTERN})
@@ -96,7 +98,7 @@ class SimpleSwitchController(ControllerBase):
         print simple_switch.mac_to_port
 
         print "list_mac_table"
-        print self.mac_to_port[datapathid]
+        print simple_switch.mac_to_port[datapathid]
         print "\n"
 
         if datapathid not in simple_switch.mac_to_port:
