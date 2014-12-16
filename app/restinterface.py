@@ -68,18 +68,18 @@ class SimpleSwitchController(ControllerBase):
         
         print "aaa"
         simple_switch = self.simple_switch_spp
-     ###   datapathid = dpid.str_to_dpid(kwargs['dpid'])
+        datapathid = dpid_lib.str_to_dpid(kwargs['dpid'])
         print "list"
         print simple_switch
         print "list_mac_table"
         print "\n"
-###        if datapathid not in simple_switch.mac_to_port:
-###            return Response(status=404)
+        if datapathid not in simple_switch.mac_to_port:
+            return Response(status=404)
 
-  ###      mac_table = simple_switch.mac_to_port.get(datapathid, {})
+        mac_table = simple_switch.mac_to_port.get(datapathid, {})
         print "list_mac_table"
         print "\n"
-     ###   body = json.dumps(mac_table)
+        body = json.dumps(mac_table)
         print "\n"
         return Response(content_type='application/json', body=body)
 
