@@ -27,7 +27,9 @@ class AdaptiveSwitch(app_manager.RyuApp):
     @set_ev_cls(ofp_event.EventOFPStateChange, [MAIN_DISPATCHER, DEAD_DISPATCHER])
     def _state_change_handler(self, ev):
         self.logger.info("AdaptiveSwitch._state_change_handler()")
-        datapath = ev.msg.datapath
+        print "ev.type =", type(ev)
+        print ev
+        datapath = ev.datapath
         if ev.state == MAIN_DISPATCHER:
             if not datapath.id in self.datapath_list:
                 self.logger.info('register datapath: %16x', datapath.id)
