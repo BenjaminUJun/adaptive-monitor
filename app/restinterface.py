@@ -81,7 +81,7 @@ class SimpleSwitchController(ControllerBase):
         print "\n"
      ###   body = json.dumps(mac_table)
         print "\n"
-   ###     return Response(content_type='application/json', body=body)
+        return Response(content_type='application/json', body=body)
 
     @route('simpleswitch', url, methods=['PUT'], requirements={'dpid': SWITCHID_PATTERN})
     def put_mac_table(self, req, **kwargs):
