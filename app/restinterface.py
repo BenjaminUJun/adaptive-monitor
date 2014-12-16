@@ -27,7 +27,7 @@ class SimpleSwitchRest(adaptivemonitor.AdaptiveMonitor):
         super(SimpleSwitchRest, self).__init__(*args, **kwargs)
 ###        self.switches = {}
         wsgi = kwargs['wsgi']
-        wsgi.register(SimpleSwitchController, {simple_switch_instance_name : self})
+        wsgi.register(SimpleSwitchController, {simple_switch_instance_name: self})
 
     @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
     def switch_features_handler(self, ev):
@@ -38,7 +38,10 @@ class SimpleSwitchRest(adaptivemonitor.AdaptiveMonitor):
         datapath = self.datapath_list[datapathid]
         entry_port = entry['port']
         entry_mac = entry['mac']
-        
+
+        print entry_port
+        print entry_mac
+
         if datapath is not None:
             parser = datapath.ofproto_parser
             if not entry_port in mac_table.values():
@@ -52,6 +55,7 @@ class SimpleSwitchRest(adaptivemonitor.AdaptiveMonitor):
                     match = parser.OFPMatch(in_port=entry_port, eth_dst=mac)
                     self.add_flow(datapath, 1, match, actions)
                 mac_table.update({entry_mac : entry_port})
+        print mac_table
         return mac_table
 
 class SimpleSwitchController(ControllerBase):
@@ -105,6 +109,8 @@ class SimpleSwitchController(ControllerBase):
             return Response(status=404)
 
         try:
+            print "dpid %16x", (datapathid,)
+            print new_entry
             mac_table = simple_switch.set_mac_to_port(datapathid, new_entry)
             print "put_mac_table"
             print mac_table
@@ -114,4 +120,5 @@ class SimpleSwitchController(ControllerBase):
             print "\n"
             return Response(content_type='application/json', body=body)
         except Exception as e:
+            print "exception"
             return Response(status=500)
