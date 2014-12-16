@@ -61,8 +61,9 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
             print "bbbbssss"
             print flow
             print flow.match
-            print hasattr(flow.match, 'in_port')
-            print hasattr(flow.match, "eth_dst")
+            print type(flow.match)
+            print "in_port" in flow.match
+            print "eth_dst" in flow.match
             try:
                 print "syccessful"
                 print flow.match["in_port"]
