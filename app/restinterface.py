@@ -116,7 +116,7 @@ class SimpleSwitchController(ControllerBase):
         print simple_switch.mac_to_port[datapathid]
         print "\n"
 
-        if int(datapathid, 16) not in simple_switch.mac_to_port:
+        if not datapathid in simple_switch.mac_to_port:
             print "404"
             return Response(status=404)
 
