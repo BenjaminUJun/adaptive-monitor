@@ -17,7 +17,9 @@ import utils
 
 simple_switch_instance_name = 'simple_switch_api_app'
 url = '/simpleswitch/mactable/{dpid}'
+url2 = '/simpleswitch/statinfo/{dpid}'
 SWITCHID_PATTERN = dpid_lib.DPID_PATTERN + r'|all'
+
 
 class SimpleSwitchRest(adaptivemonitor.AdaptiveMonitor):
 
@@ -114,7 +116,7 @@ class SimpleSwitchController(ControllerBase):
         print simple_switch.mac_to_port[datapathid]
         print "\n"
 
-        if int('5e3e089e01a7de53', 16) not in simple_switch.mac_to_port:
+        if int(datapathid, 16) not in simple_switch.mac_to_port:
             print "404"
             return Response(status=404)
 
@@ -135,3 +137,10 @@ class SimpleSwitchController(ControllerBase):
 #            print e
 #            raise e
 #            return Response(status=500)
+
+    @route('simpleswitch', url2, methods=['PUT'], requirements={'dpid': SWITCHID_PATTERN})
+    def put_stat_info(self, req, **kwargs):
+        simple_switch = self.simple_switch_spp
+        datapathid = dpid_lib.str_to_dpid(kwargs['dpid'])
+        new_entry = eval(req.body)
+        print new_entry
