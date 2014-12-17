@@ -140,6 +140,8 @@ class SimpleSwitchController(ControllerBase):
 
     @route('simpleswitch', url2, methods=['PUT'], requirements={'dpid': SWITCHID_PATTERN})
     def put_stat_info(self, req, **kwargs):
+        if kwargs['dpid'] == 'all':
+            print "allallall"
         print "put_stat_info"
         new_entry = eval(req.body)
         print new_entry
