@@ -26,7 +26,8 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
         while True:
             print "in _monitor function"
             for dp in self.datapath_list.values():
-                self._request_stats(dp)
+                self._request_flow_stats(dp)
+                self._request_port_stats(dp)
             hub.sleep(10)
 
     #flow status receiver
@@ -89,13 +90,18 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
         for stat in sorted(body, key=attrgetter('port_no')):
             self.logger.info('%016x %8x %8d %8d %8d %8d %8d %8d', ev.msg.datapath.id, stat.port_no, stat.rx_packets, stat.rx_bytes, stat.rx_errors, stat.tx_packets, stat.tx_bytes, stat.tx_errors)
 
-    def _request_stats(self, datapath):
-        self.logger.info('send stats request: %016x', datapath.id)
+    def _request_flow_stats(self, datapath):
+        self.logger.info('send flow stats request: %016x', datapath.id)
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
 
         req = parser.OFPFlowStatsRequest(datapath)
         datapath.send_msg(req)
+
+    def _request_port_stats(self, datapath):
+        self.logger.info('send flow stats request: %016x', datapath.id)
+        ofproto = datapath.ofproto
+        parser = datapath.ofproto_parser
 
         req = parser.OFPPortStatsRequest(datapath, 0, ofproto.OFPP_ANY)
         datapath.send_msg(req)
