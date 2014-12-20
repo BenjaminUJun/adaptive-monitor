@@ -19,6 +19,7 @@ class AdaptiveSwitch(app_manager.RyuApp):
     MIRROR_PORT = 25
 
     def __init__(self, *args, **kwargs):
+        logger.info("method AdaptiveSwitch.__init__")
         super(AdaptiveSwitch, self).__init__(*args, **kwargs)
         self.datapath_list = {}
         self.mac_to_port = {}

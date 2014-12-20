@@ -21,33 +21,37 @@ logger = logging.getLogger()
 class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
 
     def __init__(self, *args, **kwargs):
+        logger.info("method AdaptiveMonitor.__init__")
         super(AdaptiveMonitor, self).__init__(*args, **kwargs)
         self.port_list = {}
         self.mac_list = {}
         self.ip_list = {}
-        print "monitor starting..."
+        self.flow_count = {}
         self.monitor_thread = hub.spawn(self._monitor)
 
     #switch register
     @set_ev_cls(ofp_event.EventOFPStateChange, [MAIN_DISPATCHER, DEAD_DISPATCHER])
     def _state_change_handler(self, ev):
+        logger.info("method AdaptiveMonitor._state_change_handler")
         super(AdaptiveMonitor, self)._state_change_handler(self, ev)
         datapath = ev.datapath
         if ev.state == MAIN_DISPATCHER:
             if not datapath.id in self.datapath_list:
-                logger.debug('register datapath: %16x', datapath.id)
                 self.port_list[datapath.id] = []
                 self.mac_list[datapath.id] = []
                 self.ip_list[datapath.id] = []
+                self.flow_count[datapath.id] = []
 
         elif ev.state == DEAD_DISPATCHER:
             if datapath.id in self.datapath_list:
                 del self.port_list[datapath.id]
                 del self.mac_list[datapath.id]
                 del self.ip_list[datapath.id]
+                del self.flow_count[datapath.id]
 
     #monitor thread
     def _monitor(self):
+        logger.info("method AdaptiveMonitor._monitor")
         while True:
             print "in _monitor function"
             for dp in self.datapath_list.values():
@@ -61,24 +65,8 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
         super(AdaptiveMonitor, self)._packet_in_handler
         msg = ev.msg
         datapath = msg.datapath
-        ofproto = datapath.ofproto
-        parser = datapath.ofproto_parser
-        in_port = msg.match['in_port']
 
         pkt = packet.Packet(msg.data)
-        eth = pkt.get_protocol(ethernet.ethernet)
-        #        if eth:
-        #            print "type(eth)=", type(eth)
-        #            print "eth=", eth
-        #            print "eth.src=", eth.src
-        #            print "eth.dst=", eth.dst
-        #        else:
-        #            print "not eth type"
-        src = eth.src
-        dst = eth.dst
-        self.mac_list[datapath.id].append(src)
-        self.mac_list[datapath.id].append(dst)
-
         pkt_ipv4 = pkt.get_protocol(ipv4.ipv4)
         if pkt_ipv4:
             print type(pkt_ipv4)
@@ -87,34 +75,11 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
             print pkt_ipv4.dst
             self.ip_list[datapath.id].append(pkt_ipv4.src)
             self.ip_list[datapath.id].append(pkt_ipv4.dst)
-        else:
-            print "not ipv4 type"
-        #        print "pkt_ipv4 = ", utils.to_dict(pkt_ipv4)
+            self.flow_count[datapath.id].append((pkt_ipv4.src, pkt_ipv4.dst))
 
-        logger.debug("packet in %s %s %s %s", datapath.id, src, dst, in_port)
-
-        self.mac_to_port[datapath.id][src] = in_port
-
-        if dst in self.mac_to_port[datapath.id]:
-            out_port = self.mac_to_port[datapath.id][dst]
-        else:
-            out_port = ofproto.OFPP_FLOOD
-
-        actions = [parser.OFPActionOutput(out_port)]
-        inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)]
-
-        # install a flow to avoid packet_in next time
-        if out_port != ofproto.OFPP_FLOOD:
-            match = parser.OFPMatch(in_port=in_port, eth_dst=dst)
-            self.add_flow(datapath, 2, 2, match, inst)
-
-        data = None
-        if msg.buffer_id == ofproto.OFP_NO_BUFFER:
-            data = msg.data
-
-        out = parser.OFPPacketOut(datapath=datapath, buffer_id=msg.buffer_id, in_port=in_port, actions=actions,
-                                  data=data)
-        datapath.send_msg(out)
+            #register in ip flow entry
+            #register out ip flow entry
+            #register in ip flow entry
 
     #flow status receiver
     @set_ev_cls(ofp_event.EventOFPFlowStatsReply, MAIN_DISPATCHER)
@@ -177,6 +142,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
             logger.info('%016x %8x %8d %8d %8d %8d %8d %8d', ev.msg.datapath.id, stat.port_no, stat.rx_packets, stat.rx_bytes, stat.rx_errors, stat.tx_packets, stat.tx_bytes, stat.tx_errors)
 
     def _request_flow_stats(self, datapath):
+
         logger.info('send flow stats request: %016x', datapath.id)
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
