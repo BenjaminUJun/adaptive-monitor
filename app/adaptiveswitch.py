@@ -12,11 +12,13 @@ from ryu.lib.packet import packet, ethernet, ipv4
 import utils
 
 
+MIRROR_PORT = 25
+
+
 class AdaptiveSwitch(app_manager.RyuApp):
     OFP_VERSIONS = [ofproto_v1_3.OFP_VERSION]
 
     def __init__(self, *args, **kwargs):
-        print "simpleswitch__init__"
         super(AdaptiveSwitch, self).__init__(*args, **kwargs)
         self.datapath_list = {}
         self.mac_to_port = {}
@@ -24,11 +26,9 @@ class AdaptiveSwitch(app_manager.RyuApp):
         self.mac_list = {}
         self.ip_list = {}
 
+    #switch register
     @set_ev_cls(ofp_event.EventOFPStateChange, [MAIN_DISPATCHER, DEAD_DISPATCHER])
     def _state_change_handler(self, ev):
-        self.logger.info("AdaptiveSwitch._state_change_handler()")
-        print "ev.type =", type(ev)
-        print ev
         datapath = ev.datapath
         if ev.state == MAIN_DISPATCHER:
             if not datapath.id in self.datapath_list:
@@ -48,6 +48,7 @@ class AdaptiveSwitch(app_manager.RyuApp):
                 del self.mac_list[datapath.id]
                 del self.ip_list[datapath.id]
 
+    #switch init
     @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
     def switch_features_handler(self, ev):
         datapath = ev.msg.datapath
@@ -55,26 +56,22 @@ class AdaptiveSwitch(app_manager.RyuApp):
         parser = datapath.ofproto_parser
 
         match_empty = parser.OFPMatch()
-        actions = [parser.OFPActionOutput(1)]
-        inst = [parser.OFPInstructionGotoTable(1)]
-        self.add_flow(datapath, 0, 0, match_empty, inst)
-        
-        match_ip = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_src=('10.10.10.10'))
-        inst = [parser.OFPInstructionGotoTable(1), parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)]
-        self.add_flow(datapath, 0, 3, match_ip, inst)
+        actions = [parser.OFPActionOutput(MIRROR_PORT)]
+        for i in range(0, 3):
+            inst = [parser.OFPInstructionGotoTable(i + 1),
+                    parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)]
+            self.add_flow(datapath, i, 0, match_empty, inst)
 
-        inst = [parser.OFPInstructionGotoTable(2)]
-        self.add_flow(datapath, 1, 0, match_empty, inst)
-        
+        #        match_ip = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_src=('10.10.10.10'))
+        #        inst = [parser.OFPInstructionGotoTable(1), parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)]
+        #        self.add_flow(datapath, 0, 3, match_ip, inst)
+
         actions = [parser.OFPActionOutput(ofproto.OFPP_CONTROLLER, ofproto.OFPCML_NO_BUFFER)]
         inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)]
-        self.add_flow(datapath, 2, 0, match_empty, inst)
+        self.add_flow(datapath, 3, 0, match_empty, inst)
 
-    def add_flow(self, datapath, table_id, priority, match, inst):
-        parser = datapath.ofproto_parser
-        mod = parser.OFPFlowMod(datapath=datapath, table_id=table_id, idle_timeout=0, hard_timeout=0, priority=priority, flags=ofproto_v1_3.OFPFF_CHECK_OVERLAP, match=match, instructions=inst)
-        datapath.send_msg(mod)
 
+    #packet in
     @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
     def _packet_in_handler(self, ev):
         msg = ev.msg
@@ -82,27 +79,32 @@ class AdaptiveSwitch(app_manager.RyuApp):
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
         in_port = msg.match['in_port']
-        
+
         pkt = packet.Packet(msg.data)
         eth = pkt.get_protocol(ethernet.ethernet)
-        if eth:
-            print "type(eth)=", type(eth)
-            print "eth=", eth
-            print "eth.src=", eth.src
-            print "eth.dst=", eth.dst
-        else:
-            print "not eth type"
+        #        if eth:
+        #            print "type(eth)=", type(eth)
+        #            print "eth=", eth
+        #            print "eth.src=", eth.src
+        #            print "eth.dst=", eth.dst
+        #        else:
+        #            print "not eth type"
         src = eth.src
         dst = eth.dst
+        self.mac_list[datapath.id].append(src)
+        self.mac_list[datapath.id].append(dst)
+
         pkt_ipv4 = pkt.get_protocol(ipv4.ipv4)
         if pkt_ipv4:
             print type(pkt_ipv4)
             print pkt_ipv4
             print pkt_ipv4.src
             print pkt_ipv4.dst
+            self.ip_list[datapath.id].append(pkt_ipv4.src)
+            self.ip_list[datapath.id].append(pkt_ipv4.dst)
         else:
             print "not ipv4 type"
-#        print "pkt_ipv4 = ", utils.to_dict(pkt_ipv4)
+        #        print "pkt_ipv4 = ", utils.to_dict(pkt_ipv4)
 
         self.logger.info("packet in %s %s %s %s", datapath.id, src, dst, in_port)
 
@@ -125,5 +127,15 @@ class AdaptiveSwitch(app_manager.RyuApp):
         if msg.buffer_id == ofproto.OFP_NO_BUFFER:
             data = msg.data
 
-        out = parser.OFPPacketOut(datapath=datapath, buffer_id=msg.buffer_id, in_port=in_port, actions=actions, data=data)
+        out = parser.OFPPacketOut(datapath=datapath, buffer_id=msg.buffer_id, in_port=in_port, actions=actions,
+                                  data=data)
         datapath.send_msg(out)
+
+    #add flow
+    @staticmethod
+    def add_flow(datapath, table_id, priority, match, inst):
+        parser = datapath.ofproto_parser
+        mod = parser.OFPFlowMod(datapath=datapath, table_id=table_id, idle_timeout=0, hard_timeout=0, priority=priority,
+                                flags=ofproto_v1_3.OFPFF_CHECK_OVERLAP, match=match, instructions=inst)
+        datapath.send_msg(mod)
+

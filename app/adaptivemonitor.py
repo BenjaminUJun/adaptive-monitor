@@ -21,7 +21,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
         print "monitor starting..."
         self.monitor_thread = hub.spawn(self._monitor)
 
-
+    #monitor thread
     def _monitor(self):
         while True:
             print "in _monitor function"
@@ -29,17 +29,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
                 self._request_stats(dp)
             hub.sleep(10)
 
-    def _request_stats(self, datapath):
-        self.logger.info('send stats request: %016x', datapath.id)
-        ofproto = datapath.ofproto
-        parser = datapath.ofproto_parser
-        
-        req = parser.OFPFlowStatsRequest(datapath)
-        datapath.send_msg(req)
-        
-        req = parser.OFPPortStatsRequest(datapath, 0, ofproto.OFPP_ANY)
-        datapath.send_msg(req)
-
+    #flow status receiver
     @set_ev_cls(ofp_event.EventOFPFlowStatsReply, MAIN_DISPATCHER)
     def _flow_stats_reply_handler(self, ev):
         flows = []
@@ -76,6 +66,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
         for stat in sorted(filter_flow_table, key=lambda f: (f.match['in_port'], f.match['eth_dst'])):
             self.logger.info('%016x %8x %17s %8x %8d %8d', ev.msg.datapath.id, stat.match['in_port'], stat.match['eth_dst'], stat.instructions[0].actions[0].port, stat.packet_count, stat.byte_count)
 
+    #port status receiver
     @set_ev_cls(ofp_event.EventOFPPortStatsReply, MAIN_DISPATCHER)
     def _port_stats_reply_handler(self, ev):
         ports = []
@@ -97,3 +88,14 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
         self.logger.info('---------------- -------- -------- -------- -------- -------- -------- --------')
         for stat in sorted(body, key=attrgetter('port_no')):
             self.logger.info('%016x %8x %8d %8d %8d %8d %8d %8d', ev.msg.datapath.id, stat.port_no, stat.rx_packets, stat.rx_bytes, stat.rx_errors, stat.tx_packets, stat.tx_bytes, stat.tx_errors)
+
+    def _request_stats(self, datapath):
+        self.logger.info('send stats request: %016x', datapath.id)
+        ofproto = datapath.ofproto
+        parser = datapath.ofproto_parser
+
+        req = parser.OFPFlowStatsRequest(datapath)
+        datapath.send_msg(req)
+
+        req = parser.OFPPortStatsRequest(datapath, 0, ofproto.OFPP_ANY)
+        datapath.send_msg(req)

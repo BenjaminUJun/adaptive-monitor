@@ -68,6 +68,7 @@ class SimpleSwitchRest(adaptivemonitor.AdaptiveMonitor):
         print mac_table
         return mac_table
 
+
 class SimpleSwitchController(ControllerBase):
     def __init__(self, req, link, data, **config):
         super(SimpleSwitchController, self).__init__(req, link, data, **config)
@@ -82,7 +83,6 @@ class SimpleSwitchController(ControllerBase):
     @route('simpleswitch', url, methods=['GET'], requirements={'datapathid': SWITCHID_PATTERN})
     def list_mac_table(self, req, **kwargs):
         
-        print "aaa"
         simple_switch = self.simple_switch_spp
         datapathid = dpid_lib.str_to_dpid(kwargs['dpid'])
         print "list"
@@ -101,7 +101,6 @@ class SimpleSwitchController(ControllerBase):
 
     @route('simpleswitch', url, methods=['PUT'], requirements={'dpid': SWITCHID_PATTERN})
     def put_mac_table(self, req, **kwargs):
-        print "bbb"
         simple_switch = self.simple_switch_spp
         datapathid = dpid_lib.str_to_dpid(kwargs['dpid'])
         print "\ndpid = "
@@ -142,8 +141,9 @@ class SimpleSwitchController(ControllerBase):
     def put_stat_info(self, req, **kwargs):
         if kwargs['dpid'] == 'all':
             print "allallall"
-        print "put_stat_info"
-        new_entry = eval(req.body)
-        print new_entry
-        simple_switch = self.simple_switch_spp
-        datapathid = dpid_lib.str_to_dpid(kwargs['dpid'])
+        else:
+            print "put_stat_info"
+            new_entry = eval(req.body)
+            print new_entry
+            simple_switch = self.simple_switch_spp
+            datapathid = dpid_lib.str_to_dpid(kwargs['dpid'])

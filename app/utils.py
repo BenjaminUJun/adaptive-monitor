@@ -17,11 +17,10 @@ def to_dict(obj):
             ret_dict[k] = str(eval("obj.%s" % k))
     return ret_dict
 
-
-def __str__(self):
+def __str__(obj):
 # repr() to escape binaries
-    return self.__class__.__name__ + '(' + \
-        ','.join("%s=%s" % (k, repr(v)) for k, v in
-                self.stringify_attrs()) + ')'
+    return obj.__class__.__name__ + '(' + \
+        ','.join('%s=%s' % (k, repr(v)) for k, v in
+                obj.stringify_attrs()) + ')'
 
-__repr__ = __str__  # note: str(list) uses __repr__ for elements
+__repr__ = __str__
