@@ -9,22 +9,16 @@ from ryu.ofproto import ofproto_v1_3, ofproto_v1_3_parser, ether
 from ryu.lib import ofctl_v1_3
 from ryu.lib.packet import packet, ethernet, ipv4
 
-import utils
-
-
-MIRROR_PORT = 25
-
 
 class AdaptiveSwitch(app_manager.RyuApp):
+
     OFP_VERSIONS = [ofproto_v1_3.OFP_VERSION]
+    MIRROR_PORT = 25
 
     def __init__(self, *args, **kwargs):
         super(AdaptiveSwitch, self).__init__(*args, **kwargs)
         self.datapath_list = {}
         self.mac_to_port = {}
-        self.port_list = {}
-        self.mac_list = {}
-        self.ip_list = {}
 
     #switch register
     @set_ev_cls(ofp_event.EventOFPStateChange, [MAIN_DISPATCHER, DEAD_DISPATCHER])
@@ -35,18 +29,11 @@ class AdaptiveSwitch(app_manager.RyuApp):
                 self.logger.info('register datapath: %16x', datapath.id)
                 self.datapath_list[datapath.id] = datapath
                 self.mac_to_port[datapath.id] = {}
-                self.port_list[datapath.id] = []
-                self.mac_list[datapath.id] = []
-                self.ip_list[datapath.id] = []
-
         elif ev.state == DEAD_DISPATCHER:
             if datapath.id in self.datapath_list:
                 self.logger.info('unregister datapath: %16x', datapath.id)
                 del self.datapath_list[datapath.id]
                 del self.mac_to_port[datapath.id]
-                del self.port_list[datapath.id]
-                del self.mac_list[datapath.id]
-                del self.ip_list[datapath.id]
 
     #switch init
     @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
