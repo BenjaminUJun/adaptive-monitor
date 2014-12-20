@@ -3,6 +3,7 @@
 
 
 from operator import attrgetter
+import logging
 
 from ryu.controller import ofp_event
 from ryu.controller.handler import MAIN_DISPATCHER, DEAD_DISPATCHER
@@ -10,15 +11,16 @@ from ryu.controller.handler import set_ev_cls
 from ryu.lib import hub
 from ryu.lib.packet import packet, ethernet, ipv4
 
-
 import adaptiveswitch
 import utils
+
+
+logger = logging.getLogger()
 
 
 class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
 
     def __init__(self, *args, **kwargs):
-        print "simplesmonitor__init__"
         super(AdaptiveMonitor, self).__init__(*args, **kwargs)
         self.port_list = {}
         self.mac_list = {}
@@ -33,7 +35,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
         datapath = ev.datapath
         if ev.state == MAIN_DISPATCHER:
             if not datapath.id in self.datapath_list:
-                self.logger.info('register datapath: %16x', datapath.id)
+                logger.debug('register datapath: %16x', datapath.id)
                 self.port_list[datapath.id] = []
                 self.mac_list[datapath.id] = []
                 self.ip_list[datapath.id] = []
@@ -89,7 +91,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
             print "not ipv4 type"
         #        print "pkt_ipv4 = ", utils.to_dict(pkt_ipv4)
 
-        self.logger.info("packet in %s %s %s %s", datapath.id, src, dst, in_port)
+        logger.debug("packet in %s %s %s %s", datapath.id, src, dst, in_port)
 
         self.mac_to_port[datapath.id][src] = in_port
 
@@ -128,10 +130,10 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
                         (stat.table_id, stat.duration_sec, stat.duration_nsec, stat.priority, stat.idle_timeout, stat.hard_timeout, stat.flags, stat.cookie, stat.packet_count, stat.byte_count, stat.match, stat.instructions))
         print flows
         print "\n\n"
-        self.logger.info('FlowStats: %s', flows)
+        logger.debug('FlowStats: %s', flows)
         body = ev.msg.body
-        self.logger.info('datapath         in-port  eth-dst           out-port packets  bytes   ')
-        self.logger.info('---------------- -------- ----------------- -------- -------- --------')
+        logger.debug('datapath         in-port  eth-dst           out-port packets  bytes   ')
+        logger.debug('---------------- -------- ----------------- -------- -------- --------')
         for flow in body:
             print "bbbbssss"
             print flow
@@ -149,7 +151,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
         filter_flow_table = [flow for flow in body if "in_port" in flow.match and "eth_dst" in flow.match]
         print "filter_flow_table =", filter_flow_table
         for stat in sorted(filter_flow_table, key=lambda f: (f.match['in_port'], f.match['eth_dst'])):
-            self.logger.info('%016x %8x %17s %8x %8d %8d', ev.msg.datapath.id, stat.match['in_port'], stat.match['eth_dst'], stat.instructions[0].actions[0].port, stat.packet_count, stat.byte_count)
+            logger.debug('%016x %8x %17s %8x %8d %8d', ev.msg.datapath.id, stat.match['in_port'], stat.match['eth_dst'], stat.instructions[0].actions[0].port, stat.packet_count, stat.byte_count)
 
     #port status receiver
     @set_ev_cls(ofp_event.EventOFPPortStatsReply, MAIN_DISPATCHER)
@@ -166,16 +168,16 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
                          (stat.port_no, stat.rx_packets, stat.tx_packets, stat.rx_bytes, stat.tx_bytes, stat.rx_dropped, stat.tx_dropped, stat.rx_errors, stat.tx_errors, stat.rx_frame_err, stat.rx_over_err, stat.rx_crc_err, stat.collisions, stat.duration_sec, stat.duration_nsec))
         print ports
         print "\n\n"
-        self.logger.info('PortStats: %s', ports)
+        logger.debug('PortStats: %s', ports)
         body = ev.msg.body
 #        filter_flow_table = filter([flow for flow in body], flow.hasattr('inport') and flow.hasattr("eth_dst"))
-        self.logger.info('datapath         port     rx-pkts  rx-bytes rx-error tx-pkts  tx-bytes tx-error')
-        self.logger.info('---------------- -------- -------- -------- -------- -------- -------- --------')
+        logger.debug('datapath         port     rx-pkts  rx-bytes rx-error tx-pkts  tx-bytes tx-error')
+        logger.debug('---------------- -------- -------- -------- -------- -------- -------- --------')
         for stat in sorted(body, key=attrgetter('port_no')):
-            self.logger.info('%016x %8x %8d %8d %8d %8d %8d %8d', ev.msg.datapath.id, stat.port_no, stat.rx_packets, stat.rx_bytes, stat.rx_errors, stat.tx_packets, stat.tx_bytes, stat.tx_errors)
+            logger.info('%016x %8x %8d %8d %8d %8d %8d %8d', ev.msg.datapath.id, stat.port_no, stat.rx_packets, stat.rx_bytes, stat.rx_errors, stat.tx_packets, stat.tx_bytes, stat.tx_errors)
 
     def _request_flow_stats(self, datapath):
-        self.logger.info('send flow stats request: %016x', datapath.id)
+        logger.info('send flow stats request: %016x', datapath.id)
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
 
@@ -183,7 +185,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
         datapath.send_msg(req)
 
     def _request_port_stats(self, datapath):
-        self.logger.info('send flow stats request: %016x', datapath.id)
+        logger.info('send flow stats request: %016x', datapath.id)
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
 

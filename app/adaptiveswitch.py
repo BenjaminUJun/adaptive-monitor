@@ -1,6 +1,7 @@
 #!/usr/bin/env python2.7
 # -*- coding:utf-8 -*-
 
+import logging
 
 from ryu.base import app_manager
 from ryu.controller import ofp_event
@@ -10,8 +11,10 @@ from ryu.lib import ofctl_v1_3
 from ryu.lib.packet import packet, ethernet, ipv4
 
 
-class AdaptiveSwitch(app_manager.RyuApp):
+logger = logging.getLogger()
 
+
+class AdaptiveSwitch(app_manager.RyuApp):
     OFP_VERSIONS = [ofproto_v1_3.OFP_VERSION]
     MIRROR_PORT = 25
 
@@ -26,12 +29,12 @@ class AdaptiveSwitch(app_manager.RyuApp):
         datapath = ev.datapath
         if ev.state == MAIN_DISPATCHER:
             if not datapath.id in self.datapath_list:
-                self.logger.info('register datapath: %16x', datapath.id)
+                logger.debug('register datapath: %16x', datapath.id)
                 self.datapath_list[datapath.id] = datapath
                 self.mac_to_port[datapath.id] = {}
         elif ev.state == DEAD_DISPATCHER:
             if datapath.id in self.datapath_list:
-                self.logger.info('unregister datapath: %16x', datapath.id)
+                logger.debug('unregister datapath: %16x', datapath.id)
                 del self.datapath_list[datapath.id]
                 del self.mac_to_port[datapath.id]
 
@@ -43,7 +46,7 @@ class AdaptiveSwitch(app_manager.RyuApp):
         parser = datapath.ofproto_parser
 
         match_empty = parser.OFPMatch()
-        actions = [parser.OFPActionOutput(MIRROR_PORT)]
+        actions = [parser.OFPActionOutput(self.MIRROR_PORT)]
         for i in range(0, 3):
             inst = [parser.OFPInstructionGotoTable(i + 1),
                     parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)]
@@ -56,7 +59,6 @@ class AdaptiveSwitch(app_manager.RyuApp):
         actions = [parser.OFPActionOutput(ofproto.OFPP_CONTROLLER, ofproto.OFPCML_NO_BUFFER)]
         inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)]
         self.add_flow(datapath, 3, 0, match_empty, inst)
-
 
     #packet in
     @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
@@ -93,7 +95,7 @@ class AdaptiveSwitch(app_manager.RyuApp):
             print "not ipv4 type"
         #        print "pkt_ipv4 = ", utils.to_dict(pkt_ipv4)
 
-        self.logger.info("packet in %s %s %s %s", datapath.id, src, dst, in_port)
+        logger.debug("packet in %s %s %s %s", datapath.id, src, dst, in_port)
 
         self.mac_to_port[datapath.id][src] = in_port
 
@@ -119,6 +121,7 @@ class AdaptiveSwitch(app_manager.RyuApp):
         datapath.send_msg(out)
 
     #add flow
+    #TODO add timeout params for monitor.
     @staticmethod
     def add_flow(datapath, table_id, priority, match, inst):
         parser = datapath.ofproto_parser
@@ -126,3 +129,12 @@ class AdaptiveSwitch(app_manager.RyuApp):
                                 flags=ofproto_v1_3.OFPFF_CHECK_OVERLAP, match=match, instructions=inst)
         datapath.send_msg(mod)
 
+    #delete flow
+    #TODO add the table_id and so on? In case of similar entry in different table
+    @staticmethod
+    def del_flow(self, datapath, match):
+        ofproto = datapath.ofproto
+        parser = datapath.ofproto_parser
+        mod = parser.OFPFlowMod(datapath=datapath, command=ofproto.OFPFC_DELETE, out_port=ofproto.OFPP_ANY,
+                                out_group=ofproto.OFPG_ANY, match=match)
+        datapath.send_msg(mod)

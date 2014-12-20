@@ -15,6 +15,7 @@ import adaptivemonitor
 import utils
 
 
+logger = logging.getLogger()
 simple_switch_instance_name = 'simple_switch_api_app'
 url = '/simpleswitch/mactable/{dpid}'
 url2 = '/simpleswitch/statinfo/{dpid}'
