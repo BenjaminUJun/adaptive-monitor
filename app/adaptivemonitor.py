@@ -69,6 +69,8 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
         while True:
             print "in _monitor function"
             for dp in self.datapath_list.values():
+                print dp
+                print dp.id
                 self._request_flow_stats(dp)
                 self._request_port_stats(dp)
             #add operations to insert and delete monitoring flows entries according the statistics information
