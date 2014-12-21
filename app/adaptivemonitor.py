@@ -34,7 +34,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
         #the rest is for monitoring flows
         self.in_ip_list = {}
         self.out_ip_list = {}
-        self.flow_list = {}
+        self.in_out_ip_list = {}
 
         self.monitor_thread = hub.spawn(self._monitor)
 
@@ -52,7 +52,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
                 self.ip_list[datapath.id] = []
                 self.in_ip_list[datapath.id] = []
                 self.out_ip_list[datapath.id] = []
-                self.flow_list[datapath.id] = []
+                self.in_out_ip_list[datapath.id] = []
 
         elif ev.state == DEAD_DISPATCHER:
             if datapath.id in self.datapath_list_monitor:
@@ -62,7 +62,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
                 del self.ip_list[datapath.id]
                 del self.in_in_list[datapath.id]
                 del self.out_ip_list[datapath.id]
-                del self.flow_list[datapath.id]
+                self.in_out_ip_list[datapath.id]
 
     #monitor thread
     def _monitor(self):
@@ -106,6 +106,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
             self.ip_list[datapath.id].append(dst)
             self.in_ip_list[datapath.id].append(src)
             self.out_ip_list[datapath.id].append(dst)
+            self.in_out_ip_list[datapath.id].append((src, dst))
             self.add_monitor(datapath, in_ip=src, out_ip=None)
             self.add_monitor(datapath, in_ip=None, out_ip=dst)
             self.add_monitor(datapath, in_ip=src, out_ip=dst)
@@ -215,19 +216,19 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
             self.in_ip_list[datapath.id].append(in_ip)
             match_ip = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_src=in_ip)
             inst = [parser.OFPInstructionGotoTable(1)]
-            self.add_flow(datapath, 0, 3, match_ip, inst)
+#            self.add_flow(datapath, 0, 3, match_ip, inst)
             return
         if in_ip is not None and out_ip is None:
             self.out_ip_list[datapath.id].append(out_ip)
             match_ip = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_dst=out_ip)
             inst = [parser.OFPInstructionGotoTable(2)]
-            self.add_flow(datapath, 1, 3, match_ip, inst)
+#            self.add_flow(datapath, 1, 3, match_ip, inst)
             return
         if in_ip is not None and out_ip is not None:
             self.flow_list[datapath.id].append((in_ip, out_ip))
             match_ip = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_src=in_ip, ipv4_dst=out_ip)
             inst = [parser.OFPInstructionGotoTable(3)]
-            self.add_flow(datapath, 2, 3, match_ip, inst)
+#            self.add_flow(datapath, 2, 3, match_ip, inst)
             return
 
     def del_monitor(self, datapath, in_ip=None, out_ip=None):
