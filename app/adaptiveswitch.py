@@ -51,6 +51,11 @@ class AdaptiveSwitch(app_manager.RyuApp):
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
 
+        actions = [parser.OFPActionOutput(1)]
+        match_ip = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_src=('10.10.10.10'))
+        inst = [parser.OFPInstructionGotoTable(1), parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)]
+        self.add_flow(datapath, 0, 3, match_ip, inst)
+
         match_empty = parser.OFPMatch()
         actions = [parser.OFPActionOutput(self.MIRROR_PORT)]
         for i in range(0, 3):
