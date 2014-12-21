@@ -86,11 +86,6 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
         datapath = msg.datapath
 
         in_port = msg.match['in_port']
-        print "111\n"
-        print self.port_list.keys()
-        print "222\n"
-        print in_port
-        print "333\n"
         self.port_list[datapath.id].append(in_port)
 
         pkt = packet.Packet(msg.data)
@@ -222,8 +217,11 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
             self.out_ip_list[datapath.id].append(out_ip)
             match_ip = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_dst=out_ip)
             inst = [parser.OFPInstructionGotoTable(2)]
+            print "datapath.id = ",
             print datapath.id
+            print "match = ",
             print utils.to_string(match_ip)
+            print "inst = ",
             print utils.to_string(inst)
             self.add_flow(datapath, 1, 3, match_ip, inst)
             return
