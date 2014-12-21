@@ -29,7 +29,6 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
         self.port_list = {}
         self.mac_list = {}
         self.ip_list = {}
-        self.flow_count = {}
 
         #the rest is for monitoring flows
         self.in_ip_list = {}
@@ -49,7 +48,6 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
                 self.port_list[datapath.id] = []
                 self.mac_list[datapath.id] = []
                 self.ip_list[datapath.id] = []
-                self.flow_count[datapath.id] = []
                 self.in_ip_list[datapath.id] = []
                 self.out_ip_list[datapath.id] = []
                 self.flow_list[datapath.id] = []
@@ -59,7 +57,6 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
                 del self.port_list[datapath.id]
                 del self.mac_list[datapath.id]
                 del self.ip_list[datapath.id]
-                del self.flow_count[datapath.id]
                 del self.in_in_list[datapath.id]
                 del self.out_ip_list[datapath.id]
                 del self.flow_list[datapath.id]
@@ -85,6 +82,9 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
         msg = ev.msg
         datapath = msg.datapath
 
+        in_port = msg.match['in_port']
+        self.port_list[datapath.id].append(in_port)
+
         pkt = packet.Packet(msg.data)
         pkt_ipv4 = pkt.get_protocol(ipv4.ipv4)
         if pkt_ipv4:
@@ -94,15 +94,22 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
 #            print pkt_ipv4.dst
             src = pkt_ipv4.src
             dst = pkt_ipv4.dst
-            print "\n"
-            print self.ip_list.keys()
-            print "\n"
             self.ip_list[datapath.id].append(src)
             self.ip_list[datapath.id].append(dst)
+            self.in_ip_list[datapath.id].append(src)
+            self.out_ip_list[datapath.id].append(dst)
             self.flow_count[datapath.id].append((src, dst))
             self.add_monitor(datapath, in_ip=src, out_ip=None)
             self.add_monitor(datapath, in_ip=None, out_ip=dst)
             self.add_monitor(datapath, in_ip=src, out_ip=dst)
+
+        pkt = packet.Packet(msg.data)
+        eth = pkt.get_protocol(ethernet.ethernet)
+        if eth:
+            src = eth.src
+            dst = eth.dst
+            self.mac_list[datapath.id].append(src)
+            self.mac_list[datapath.id].append(dst)
 
             #register in ip flow entry
             #register out ip flow entry

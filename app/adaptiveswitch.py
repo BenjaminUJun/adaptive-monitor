@@ -75,8 +75,6 @@ class AdaptiveSwitch(app_manager.RyuApp):
         eth = pkt.get_protocol(ethernet.ethernet)
         src = eth.src
         dst = eth.dst
-        self.mac_list[datapath.id].append(src)
-        self.mac_list[datapath.id].append(dst)
 
         logging.debug("packet in %d %s %s %d", datapath.id, src, dst, in_port)
 
