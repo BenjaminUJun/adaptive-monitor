@@ -18,7 +18,8 @@ import utils
 
 
 logger = logging.getLogger()
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG,
+                    format="[%(levelname)s %(asctime)s] %(name)s:: %(message)s")
 
 
 class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
