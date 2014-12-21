@@ -10,6 +10,7 @@ from ryu.ofproto import ofproto_v1_3, ofproto_v1_3_parser, ether
 from ryu.lib import ofctl_v1_3
 from ryu.lib.packet import packet, ethernet, ipv4
 
+import utils
 
 logging.basicConfig(level=logging.DEBUG,
                     format="[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s",
