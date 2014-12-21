@@ -77,7 +77,7 @@ class AdaptiveSwitch(app_manager.RyuApp):
         self.mac_list[datapath.id].append(src)
         self.mac_list[datapath.id].append(dst)
 
-        logger.debug("packet in %s %s %s %s", datapath.id, src, dst, in_port)
+        logger.debug("packet in %d %s %s %d", datapath.id, src, dst, in_port)
 
         self.mac_to_port[datapath.id][src] = in_port
 
