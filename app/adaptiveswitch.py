@@ -79,11 +79,13 @@ class AdaptiveSwitch(app_manager.RyuApp):
         src = eth.src
         dst = eth.dst
 
-        logging.debug("packet in %d %s %s %d", datapath.id, src, dst, in_port)
+        logging.info("packet in %d %s %s %d" % (datapath.id, src, dst, in_port))
+        print "packet in %d %s %s %d" % (datapath.id, src, dst, in_port)
         print "in switch packet in "
         print "in switch packet in "
         print "in switch packet in "
         print "in switch packet in "
+
         self.mac_to_port[datapath.id][src] = in_port
 
         if dst in self.mac_to_port[datapath.id]:
@@ -95,6 +97,10 @@ class AdaptiveSwitch(app_manager.RyuApp):
         inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)]
 
         if out_port != ofproto.OFPP_FLOOD:
+            print "add flow add flow"
+            print "add flow add flow"
+            print "add flow add flow"
+            print "add flow add flow"
             match = parser.OFPMatch(in_port=in_port, eth_dst=dst)
             self.add_flow(datapath, 3, 2, match, inst)
 
