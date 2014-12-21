@@ -80,7 +80,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
     @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
     def _packet_in_handler(self, ev):
         logger.info("method AdaptiveMonitor._packet_in_handler")
-        super(AdaptiveMonitor, self)._packet_in_handler
+        super(AdaptiveMonitor, self)._packet_in_handler(ev)
         msg = ev.msg
         datapath = msg.datapath
 
