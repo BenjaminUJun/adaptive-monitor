@@ -174,7 +174,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
                         stat.rx_bytes, stat.rx_errors, stat.tx_packets, stat.tx_bytes, stat.tx_errors)
 
     @staticmethod
-    def _request_flow_stats(self, datapath):
+    def _request_flow_stats(datapath):
         logger.info("method AdaptiveMonitor._request_flow_stats datapath = %16x" % datapath.id)
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
