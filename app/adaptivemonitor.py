@@ -106,7 +106,6 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
             self.ip_list[datapath.id].append(dst)
             self.in_ip_list[datapath.id].append(src)
             self.out_ip_list[datapath.id].append(dst)
-            self.flow_count[datapath.id].append((src, dst))
             self.add_monitor(datapath, in_ip=src, out_ip=None)
             self.add_monitor(datapath, in_ip=None, out_ip=dst)
             self.add_monitor(datapath, in_ip=src, out_ip=dst)
