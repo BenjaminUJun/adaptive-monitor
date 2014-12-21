@@ -80,7 +80,10 @@ class AdaptiveSwitch(app_manager.RyuApp):
         dst = eth.dst
 
         logging.debug("packet in %d %s %s %d", datapath.id, src, dst, in_port)
-
+        print "in switch packet in "
+        print "in switch packet in "
+        print "in switch packet in "
+        print "in switch packet in "
         self.mac_to_port[datapath.id][src] = in_port
 
         if dst in self.mac_to_port[datapath.id]:
