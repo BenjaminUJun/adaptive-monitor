@@ -26,6 +26,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
     def __init__(self, *args, **kwargs):
         logging.info("method AdaptiveMonitor.__init__")
         super(AdaptiveMonitor, self).__init__(*args, **kwargs)
+        self.datapath_list = {}
         self.port_list = {}
         self.mac_list = {}
         self.ip_list = {}
@@ -45,6 +46,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
         datapath = ev.datapath
         if ev.state == MAIN_DISPATCHER:
             if not datapath.id in self.datapath_list:
+                self.datapath_list[datapath.id] = datapath
                 self.port_list[datapath.id] = []
                 self.mac_list[datapath.id] = []
                 self.ip_list[datapath.id] = []
@@ -54,6 +56,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
 
         elif ev.state == DEAD_DISPATCHER:
             if datapath.id in self.datapath_list:
+                del self.datapath_list[datapath.id]
                 del self.port_list[datapath.id]
                 del self.mac_list[datapath.id]
                 del self.ip_list[datapath.id]
