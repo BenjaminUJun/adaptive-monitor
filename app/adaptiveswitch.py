@@ -63,7 +63,7 @@ class AdaptiveSwitch(app_manager.RyuApp):
     #packet in
     @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
     def _packet_in_handler(self, ev):
-        logger.info("method AdaptiveSwitch._packet_in_handler datapath = %16d" % ev.datapath.id)
+        logger.info("method AdaptiveSwitch._packet_in_handler datapath = %16d" % ev.msg.datapath.id)
         msg = ev.msg
         datapath = msg.datapath
         ofproto = datapath.ofproto
