@@ -4,11 +4,13 @@
 
 from operator import attrgetter
 import logging
+import threading
 
 from ryu.controller import ofp_event
 from ryu.controller.handler import MAIN_DISPATCHER, DEAD_DISPATCHER
 from ryu.controller.handler import set_ev_cls
 from ryu.lib import hub
+from ryu.ofproto import ofproto_v1_3, ofproto_v1_3_parser, ether
 from ryu.lib.packet import packet, ethernet, ipv4
 
 import adaptiveswitch
@@ -16,10 +18,10 @@ import utils
 
 
 logger = logging.getLogger()
+logging.basicConfig(level=logging.DEBUG)
 
 
 class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
-
     def __init__(self, *args, **kwargs):
         logger.info("method AdaptiveMonitor.__init__")
         super(AdaptiveMonitor, self).__init__(*args, **kwargs)
@@ -57,11 +59,13 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
             for dp in self.datapath_list.values():
                 self._request_flow_stats(dp)
                 self._request_port_stats(dp)
+            #add operations to insert and delete monitoring flows entries
             hub.sleep(10)
 
     #packet in
     @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
     def _packet_in_handler(self, ev):
+        logger.info("method AdaptiveMonitor._packet_in_handler")
         super(AdaptiveMonitor, self)._packet_in_handler
         msg = ev.msg
         datapath = msg.datapath
@@ -84,6 +88,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
     #flow status receiver
     @set_ev_cls(ofp_event.EventOFPFlowStatsReply, MAIN_DISPATCHER)
     def _flow_stats_reply_handler(self, ev):
+        logger.info("method AdaptiveMonitor._flow_stats_reply_handler")
         flows = []
         for stat in ev.msg.body:
             flows.append('table_id=%s '
@@ -92,7 +97,9 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
                          'idle_timeout=%d hard_timeout=%d flags=0x%04x '
                          'cookie=%d packet_count=%d byte_count=%d '
                          'match=%s instructions=%s' %
-                        (stat.table_id, stat.duration_sec, stat.duration_nsec, stat.priority, stat.idle_timeout, stat.hard_timeout, stat.flags, stat.cookie, stat.packet_count, stat.byte_count, stat.match, stat.instructions))
+                         (stat.table_id, stat.duration_sec, stat.duration_nsec, stat.priority, stat.idle_timeout,
+                          stat.hard_timeout, stat.flags, stat.cookie, stat.packet_count, stat.byte_count, stat.match,
+                          stat.instructions))
         print flows
         print "\n\n"
         logger.debug('FlowStats: %s', flows)
@@ -116,11 +123,13 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
         filter_flow_table = [flow for flow in body if "in_port" in flow.match and "eth_dst" in flow.match]
         print "filter_flow_table =", filter_flow_table
         for stat in sorted(filter_flow_table, key=lambda f: (f.match['in_port'], f.match['eth_dst'])):
-            logger.debug('%016x %8x %17s %8x %8d %8d', ev.msg.datapath.id, stat.match['in_port'], stat.match['eth_dst'], stat.instructions[0].actions[0].port, stat.packet_count, stat.byte_count)
+            logger.debug('%016x %8x %17s %8x %8d %8d', ev.msg.datapath.id, stat.match['in_port'], stat.match['eth_dst'],
+                         stat.instructions[0].actions[0].port, stat.packet_count, stat.byte_count)
 
     #port status receiver
     @set_ev_cls(ofp_event.EventOFPPortStatsReply, MAIN_DISPATCHER)
     def _port_stats_reply_handler(self, ev):
+        logger.info("method AdaptiveMonitor._port_stats_reply_handler")
         ports = []
         for stat in ev.msg.body:
             ports.append('port_no=%d '
@@ -130,30 +139,88 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
                          'rx_errors=%d tx_errors=%d '
                          'rx_frame_err=%d rx_over_err=%d rx_crc_err=%d '
                          'collisions=%d duration_sec=%d duration_nsec=%d' %
-                         (stat.port_no, stat.rx_packets, stat.tx_packets, stat.rx_bytes, stat.tx_bytes, stat.rx_dropped, stat.tx_dropped, stat.rx_errors, stat.tx_errors, stat.rx_frame_err, stat.rx_over_err, stat.rx_crc_err, stat.collisions, stat.duration_sec, stat.duration_nsec))
+                         (stat.port_no, stat.rx_packets, stat.tx_packets, stat.rx_bytes, stat.tx_bytes, stat.rx_dropped,
+                          stat.tx_dropped, stat.rx_errors, stat.tx_errors, stat.rx_frame_err, stat.rx_over_err,
+                          stat.rx_crc_err, stat.collisions, stat.duration_sec, stat.duration_nsec))
         print ports
         print "\n\n"
         logger.debug('PortStats: %s', ports)
         body = ev.msg.body
-#        filter_flow_table = filter([flow for flow in body], flow.hasattr('inport') and flow.hasattr("eth_dst"))
+        #        filter_flow_table = filter([flow for flow in body], flow.hasattr('inport') and flow.hasattr("eth_dst"))
         logger.debug('datapath         port     rx-pkts  rx-bytes rx-error tx-pkts  tx-bytes tx-error')
         logger.debug('---------------- -------- -------- -------- -------- -------- -------- --------')
-        for stat in sorted(body, key=attrgetter('port_no')):
-            logger.info('%016x %8x %8d %8d %8d %8d %8d %8d', ev.msg.datapath.id, stat.port_no, stat.rx_packets, stat.rx_bytes, stat.rx_errors, stat.tx_packets, stat.tx_bytes, stat.tx_errors)
+        #        for stat in sorted(body, key=attrgetter('port_no')):
+        for stat in sorted(body, key=lambda l: l.port_no):
+            logger.info('%016x %8x %8d %8d %8d %8d %8d %8d', ev.msg.datapath.id, stat.port_no, stat.rx_packets,
+                        stat.rx_bytes, stat.rx_errors, stat.tx_packets, stat.tx_bytes, stat.tx_errors)
 
+    @staticmethod
     def _request_flow_stats(self, datapath):
-
-        logger.info('send flow stats request: %016x', datapath.id)
+        logger.info("method AdaptiveMonitor._request_flow_stats datapath = %16x" % datapath.id)
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
 
         req = parser.OFPFlowStatsRequest(datapath)
         datapath.send_msg(req)
 
-    def _request_port_stats(self, datapath):
-        logger.info('send flow stats request: %016x', datapath.id)
+    @staticmethod
+    def _request_port_stats(datapath):
+        logger.info("method AdaptiveMonitor._request_port_stats datapath = %16x" % datapath.id)
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
 
         req = parser.OFPPortStatsRequest(datapath, 0, ofproto.OFPP_ANY)
         datapath.send_msg(req)
+
+    #the rest is for monitoring flows
+    in_ip_list = []
+    out_ip_list = []
+    flow_list = []
+
+
+    def run(self):
+        while self.thead_alive:
+            adaptiveswitch.AdaptiveSwitch.add_flow(datapath)
+
+    def add_monitor(self, datapath, ip_in=None, ip_out=None):
+        parser = datapath.ofproto_parser
+        ofproto = datapath.ofproto
+        if ip_in is None and ip_out is not None:
+            self.in_ip_list.append(ip_in)
+            match_ip = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_src=ip_in)
+            inst = [parser.OFPInstructionGotoTable(1)]
+            self.add_flow(datapath, 0, 3, match_ip, inst)
+            return
+        if ip_in is not None and ip_out is None:
+            self.out_ip_list.append(ip_out)
+            match_ip = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_dst=ip_out)
+            inst = [parser.OFPInstructionGotoTable(2)]
+            self.add_flow(datapath, 0, 3, match_ip, inst)
+            return
+        if ip_in is not None and ip_out is not None:
+            self.flow_list.append((ip_in, ip_out))
+            match_ip = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_dst=ip_in, ipv4_dst=ip_out)
+            inst = [parser.OFPInstructionGotoTable(3)]
+            self.add_flow(datapath, 0, 3, match_ip, inst)
+            return
+
+    def del_monitor(self, datapath, ip_in=None, ip_out=None):
+        if ip_in == None and ip_out != None:
+            try:
+                self.in_ip_list.remove(ip_in)
+            except ValueError as ex:
+                pass
+            return
+        if ip_in != None and ip_out == None:
+            try:
+                self.out_ip_list.remove(ip_out)
+            except ValueError as ex:
+                pass
+            return
+        if ip_in != None and ip_out != None:
+            try:
+                self.flow_list.remove((ip_in, ip_out))
+            except ValueError as ex:
+                pass
+
+            return

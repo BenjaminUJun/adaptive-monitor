@@ -12,6 +12,7 @@ from ryu.lib.packet import packet, ethernet, ipv4
 
 
 logger = logging.getLogger()
+logging.basicConfig(level=logging.DEBUG)
 
 
 class AdaptiveSwitch(app_manager.RyuApp):
@@ -27,6 +28,7 @@ class AdaptiveSwitch(app_manager.RyuApp):
     #switch register
     @set_ev_cls(ofp_event.EventOFPStateChange, [MAIN_DISPATCHER, DEAD_DISPATCHER])
     def _state_change_handler(self, ev):
+        logger.info("method AdaptiveSwitch._state_change_handler datapath = %16d" % ev.datapath.id)
         datapath = ev.datapath
         if ev.state == MAIN_DISPATCHER:
             if not datapath.id in self.datapath_list:
@@ -52,10 +54,6 @@ class AdaptiveSwitch(app_manager.RyuApp):
             inst = [parser.OFPInstructionGotoTable(i + 1),
                     parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)]
             self.add_flow(datapath, i, 0, match_empty, inst)
-
-        #        match_ip = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_src=('10.10.10.10'))
-        #        inst = [parser.OFPInstructionGotoTable(1), parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)]
-        #        self.add_flow(datapath, 0, 3, match_ip, inst)
 
         actions = [parser.OFPActionOutput(ofproto.OFPP_CONTROLLER, ofproto.OFPCML_NO_BUFFER)]
         inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)]

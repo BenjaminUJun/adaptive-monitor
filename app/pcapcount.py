@@ -7,7 +7,10 @@ import atexit
 import signal
 import sys
 import commands
+import logging
 
+logger = logging.getLogger()
+logging.basicConfig(level=logging.DEBUG)
 
 
 class sendData(multiprocessing.Process):
@@ -67,7 +70,7 @@ class listenInterface(multiprocessing.Process):
         self.flow_count = dict_f
         self.pc = None
         self.myblock = myblock
-        self.threadalive = True
+        self.process_alive = True
 
     def run(self):
         self.startListen()
@@ -81,7 +84,7 @@ class listenInterface(multiprocessing.Process):
             traceback.print_exc()
             return
         for ts, pkt in self.pc:
-            if not self.threadalive:
+            if not self.process_alive:
                 return
             self.packetscount = self.packetscount + 1
             print "\rpackets captured = %d" % self.packetscount,
@@ -109,50 +112,47 @@ class listenInterface(multiprocessing.Process):
                 else:
                     dport = -1
             self.myblock.acquire()
-            if self.flow_count.has_key((src, dst)):
-                self.flow_count[(src, dst)] = self.flow_count[(src, dst)] + 1;
-            else:
-                self.flow_count[(src, dst)] = 1;
-            self.flow_count["pktcountslot"] = self.flow_count["pktcountslot"] + 1
+            self.flow_count[(src, dst)] = self.flow_count[(src, dst)] + 1 if self.flow_count.has_key((src, dst)) else 1
+            self.flow_count["pktcountslot"] += 1
             #print "length = %d" % len(self.flow_count)
             self.myblock.release()
 
     def stop(self):
-        self.threadalive = False
+        self.process_alive = False
 
 
-class listenController(multiprocessing.Process):
+class ListenController(multiprocessing.Process):
     def init(self):
         multiprocessing.Process.__init__(self)
-        self.listeninstance = None
-        self.sendinstance = None
+        self.listen_instance = None
+        self.send_instance = None
 
     def run(self):
         try:
             mgr = multiprocessing.Manager()
             dict_f = mgr.dict()
             dict_f["pktcountslot"] = 0
-            myblock = multiprocessing.RLock()
-            self.listeninstance = listenInterface("eth1", dict_f, myblock)
-            self.listeninstance.start()
-            self.sendinstance = sendData(dict_f, 3, "output", myblock)
-            self.sendinstance.start()
-            self.listeninstance.join()
-            self.sendinstance.join()
-            self.listeninstance.stop()
-            self.sendinstance.stop()
+            my_block = multiprocessing.RLock()
+            self.listen_instance = listenInterface("eth1", dict_f, my_block)
+            self.listen_instance.start()
+            self.send_instance = sendData(dict_f, 3, "output", my_block)
+            self.send_instance.start()
+            self.listen_instance.join()
+            self.send_instance.join()
+            self.listen_instance.stop()
+            self.send_instance.stop()
         except Exception, ex:
             print "failed"
             print ex
             return
 
-    def killall(self):
-        self.listeninstance.terminate()
-        self.sendinstance.terminate()
+    def kill_all(self):
+        self.listen_instance.terminate()
+        self.send_instance.terminate()
 
 
 def _exit_clean():
-    listen.killall()
+    listen.kill_all()
     listen.terminate()
 
 
@@ -162,10 +162,10 @@ if __name__ == "__main__":
     signal.signal(signal.SIGINT, _exit_clean)
     signal.signal(signal.SIGTERM, _exit_clean)
     try:
-        listen = listenController()
+        listen = ListenController()
         listen.start()
         atexit.register(_exit_clean)
         listen.join()
-    except:
-        self.terminate()
+    except Exception as ex:
+        print "out from listen:"
         listen.terminate()
