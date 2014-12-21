@@ -83,6 +83,11 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
         datapath = msg.datapath
 
         in_port = msg.match['in_port']
+        print "111\n"
+        print self.port_list.keys()
+        print "222\n"
+        print in_port
+        print "333\n"
         self.port_list[datapath.id].append(in_port)
 
         pkt = packet.Packet(msg.data)
