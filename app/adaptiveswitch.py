@@ -11,9 +11,9 @@ from ryu.lib import ofctl_v1_3
 from ryu.lib.packet import packet, ethernet, ipv4
 
 
-logger = logging.getLogger()
-logger.basicConfig(level=logging.DEBUG,
+logging.basicConfig(level=logging.DEBUG,
                     format="[%(levelname)s %(asctime)s] %(name)s:: %(message)s")
+logger = logging.getLogger()
 
 
 class AdaptiveSwitch(app_manager.RyuApp):
