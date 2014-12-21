@@ -105,6 +105,8 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
             self.add_monitor(datapath, in_ip=src, out_ip=None)
             self.add_monitor(datapath, in_ip=None, out_ip=dst)
             self.add_monitor(datapath, in_ip=src, out_ip=dst)
+        else:
+            print "not ipv4 packet"
 
         pkt = packet.Packet(msg.data)
         eth = pkt.get_protocol(ethernet.ethernet)
