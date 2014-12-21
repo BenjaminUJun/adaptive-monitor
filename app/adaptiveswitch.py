@@ -43,7 +43,8 @@ class AdaptiveSwitch(app_manager.RyuApp):
 
     #switch init
     @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
-    def switch_features_handler(self, ev):
+    def _switch_features_handler(self, ev):
+        logger.info("method AdaptiveSwitch._switch_features_handler datapath = %16d" % ev.datapath.id)
         datapath = ev.msg.datapath
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
@@ -62,39 +63,21 @@ class AdaptiveSwitch(app_manager.RyuApp):
     #packet in
     @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
     def _packet_in_handler(self, ev):
+        logger.info("method AdaptiveSwitch._packet_in_handler datapath = %16d" % ev.datapath.id)
         msg = ev.msg
         datapath = msg.datapath
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
         in_port = msg.match['in_port']
 
+        logger.debug("packet in %s %s %s %s", datapath.id, src, dst, in_port)
+
         pkt = packet.Packet(msg.data)
         eth = pkt.get_protocol(ethernet.ethernet)
-        #        if eth:
-        #            print "type(eth)=", type(eth)
-        #            print "eth=", eth
-        #            print "eth.src=", eth.src
-        #            print "eth.dst=", eth.dst
-        #        else:
-        #            print "not eth type"
         src = eth.src
         dst = eth.dst
         self.mac_list[datapath.id].append(src)
         self.mac_list[datapath.id].append(dst)
-
-        pkt_ipv4 = pkt.get_protocol(ipv4.ipv4)
-        if pkt_ipv4:
-            print type(pkt_ipv4)
-            print pkt_ipv4
-            print pkt_ipv4.src
-            print pkt_ipv4.dst
-            self.ip_list[datapath.id].append(pkt_ipv4.src)
-            self.ip_list[datapath.id].append(pkt_ipv4.dst)
-        else:
-            print "not ipv4 type"
-        #        print "pkt_ipv4 = ", utils.to_dict(pkt_ipv4)
-
-        logger.debug("packet in %s %s %s %s", datapath.id, src, dst, in_port)
 
         self.mac_to_port[datapath.id][src] = in_port
 
@@ -106,10 +89,9 @@ class AdaptiveSwitch(app_manager.RyuApp):
         actions = [parser.OFPActionOutput(out_port)]
         inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)]
 
-        # install a flow to avoid packet_in next time
         if out_port != ofproto.OFPP_FLOOD:
             match = parser.OFPMatch(in_port=in_port, eth_dst=dst)
-            self.add_flow(datapath, 2, 2, match, inst)
+            self.add_flow(datapath, 3, 2, match, inst)
 
         data = None
         if msg.buffer_id == ofproto.OFP_NO_BUFFER:

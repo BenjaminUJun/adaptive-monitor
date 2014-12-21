@@ -29,6 +29,12 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
         self.mac_list = {}
         self.ip_list = {}
         self.flow_count = {}
+
+        #the rest is for monitoring flows
+        self.in_ip_list = {}
+        self.out_ip_list = {}
+        self.flow_list = {}
+
         self.monitor_thread = hub.spawn(self._monitor)
 
     #switch register
@@ -43,6 +49,9 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
                 self.mac_list[datapath.id] = []
                 self.ip_list[datapath.id] = []
                 self.flow_count[datapath.id] = []
+                self.in_ip_list[datapath.id] = []
+                self.out_ip_list[datapath.id] = []
+                self.flow_list[datapath.id] = []
 
         elif ev.state == DEAD_DISPATCHER:
             if datapath.id in self.datapath_list:
@@ -50,6 +59,9 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
                 del self.mac_list[datapath.id]
                 del self.ip_list[datapath.id]
                 del self.flow_count[datapath.id]
+                del self.in_in_list[datapath.id]
+                del self.out_ip_list[datapath.id]
+                del self.flow_list[datapath.id]
 
     #monitor thread
     def _monitor(self):
@@ -172,55 +184,50 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
         req = parser.OFPPortStatsRequest(datapath, 0, ofproto.OFPP_ANY)
         datapath.send_msg(req)
 
-    #the rest is for monitoring flows
-    in_ip_list = []
-    out_ip_list = []
-    flow_list = []
-
-
-    def run(self):
-        while self.thead_alive:
-            adaptiveswitch.AdaptiveSwitch.add_flow(datapath)
-
-    def add_monitor(self, datapath, ip_in=None, ip_out=None):
+    def add_monitor(self, datapath, in_ip=None, out_ip=None, hard_time_out=0, dur):
         parser = datapath.ofproto_parser
-        ofproto = datapath.ofproto
-        if ip_in is None and ip_out is not None:
-            self.in_ip_list.append(ip_in)
-            match_ip = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_src=ip_in)
+        if in_ip is None and out_ip is not None:
+            self.in_ip_list[datapath.id].append(in_ip)
+            match_ip = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_src=in_ip)
             inst = [parser.OFPInstructionGotoTable(1)]
             self.add_flow(datapath, 0, 3, match_ip, inst)
             return
-        if ip_in is not None and ip_out is None:
-            self.out_ip_list.append(ip_out)
-            match_ip = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_dst=ip_out)
+        if in_ip is not None and out_ip is None:
+            self.out_ip_list[datapath.id].append(out_ip)
+            match_ip = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_dst=out_ip)
             inst = [parser.OFPInstructionGotoTable(2)]
-            self.add_flow(datapath, 0, 3, match_ip, inst)
+            self.add_flow(datapath, 1, 3, match_ip, inst)
             return
-        if ip_in is not None and ip_out is not None:
-            self.flow_list.append((ip_in, ip_out))
-            match_ip = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_dst=ip_in, ipv4_dst=ip_out)
+        if in_ip is not None and out_ip is not None:
+            self.flow_list[datapath.id].append((in_ip, out_ip))
+            match_ip = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_dst=in_ip, ipv4_dst=out_ip)
             inst = [parser.OFPInstructionGotoTable(3)]
-            self.add_flow(datapath, 0, 3, match_ip, inst)
+            self.add_flow(datapath, 2, 3, match_ip, inst)
             return
 
-    def del_monitor(self, datapath, ip_in=None, ip_out=None):
-        if ip_in == None and ip_out != None:
+    def del_monitor(self, datapath, in_ip=None, out_ip=None):
+        parser = datapath.ofproto_parser
+        if in_ip is None and out_ip is not None:
             try:
-                self.in_ip_list.remove(ip_in)
+                self.in_ip_list[datapath.id].remove(in_ip)
+                match_ip = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_src=in_ip)
+                self.del_flow(datapath, match_ip)
             except ValueError as ex:
-                pass
+                logger.exception("del_flow for in_ip = %s on %16xd failed" % (in_ip, datapath.id))
             return
-        if ip_in != None and ip_out == None:
+        if in_ip is not None and out_ip is None:
             try:
-                self.out_ip_list.remove(ip_out)
+                self.out_ip_list[datapath.id].remove(out_ip)
+                match_ip = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_dst=out_ip)
+                self.del_flow(datapath, match_ip)
             except ValueError as ex:
-                pass
+                logger.exception("del_flow for out_ip = %s on %16xd failed" % (in_ip, datapath.id))
             return
-        if ip_in != None and ip_out != None:
+        if in_ip is not None and out_ip is not None:
             try:
-                self.flow_list.remove((ip_in, ip_out))
+                self.flow_list[datapath.id].remove((in_ip, out_ip))
+                match_ip = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_src=in_ip, ipv4_dst=out_ip)
+                self.del_flow(datapath, match_ip)
             except ValueError as ex:
-                pass
-
+                logger.exception("del_flow for (ip_in = %s, out_ip = %s) on %16xd failed" % (in_ip, out_ip, datapath.id))
             return
