@@ -74,7 +74,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
                 self._request_flow_stats(dp)
                 self._request_port_stats(dp)
             #add operations to insert and delete monitoring flows entries according the statistics information
-            hub.sleep(10)
+            hub.sleep(20)
 
     #packet in
     @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
@@ -93,6 +93,9 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
 #            print pkt_ipv4.dst
             src = pkt_ipv4.src
             dst = pkt_ipv4.dst
+            print "\n"
+            print self.ip_list.keys()
+            print "\n"
             self.ip_list[datapath.id].append(src)
             self.ip_list[datapath.id].append(dst)
             self.flow_count[datapath.id].append((src, dst))
