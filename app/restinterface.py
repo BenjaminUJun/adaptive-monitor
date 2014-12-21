@@ -91,10 +91,10 @@ class SimpleSwitchController(ControllerBase):
         logger.info("method SimpleSwitchController._list_mac_table")
         simple_switch = self.simple_switch_spp
         datapathid = dpid_lib.str_to_dpid(kwargs['dpid'])
-        print "list"
-        print simple_switch
-        print "list_mac_table"
-        print "\n"
+#        print "list"
+#        print simple_switch
+#        print "list_mac_table"
+#        print "\n"
         if datapathid not in simple_switch.mac_to_port:
             return Response(status=404)
 
@@ -147,8 +147,7 @@ class SimpleSwitchController(ControllerBase):
     @route('simpleswitch', url2, methods=['PUT'], requirements={'dpid': SWITCHID_PATTERN})
     def _put_stat_info(self, req, **kwargs):
         logger.info("method SimpleSwitchController._put_stat_info")
-        else:
-            new_entry = eval(req.body)
-            print new_entry
-            simple_switch = self.simple_switch_spp
-            datapathid = dpid_lib.str_to_dpid(kwargs['dpid'])
+        new_entry = eval(req.body)
+        print new_entry
+        simple_switch = self.simple_switch_spp
+        datapathid = dpid_lib.str_to_dpid(kwargs['dpid'])
