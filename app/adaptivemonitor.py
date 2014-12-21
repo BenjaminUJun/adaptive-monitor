@@ -207,13 +207,13 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
 
     def add_monitor(self, datapath, in_ip=None, out_ip=None):
         parser = datapath.ofproto_parser
-        if in_ip is None and out_ip is not None:
+        if in_ip is not None and out_ip is None:
             self.in_ip_list[datapath.id].append(in_ip)
             match_ip = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_src=in_ip)
             inst = [parser.OFPInstructionGotoTable(1)]
             self.add_flow(datapath, 0, 3, match_ip, inst)
             return
-        if in_ip is not None and out_ip is None:
+        if in_ip is None and out_ip is not None:
             self.out_ip_list[datapath.id].append(out_ip)
             print "aaa"
             print out_ip
@@ -243,7 +243,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
 
     def del_monitor(self, datapath, in_ip=None, out_ip=None):
         parser = datapath.ofproto_parser
-        if in_ip is None and out_ip is not None:
+        if in_ip is not None and out_ip is None:
             try:
                 self.in_ip_list[datapath.id].remove(in_ip)
                 match_ip = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_src=in_ip)
@@ -251,7 +251,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
             except ValueError as ex:
                 logging.exception("del_flow for in_ip = %s on %16xd failed" % (in_ip, datapath.id))
             return
-        if in_ip is not None and out_ip is None:
+        if in_ip is None and out_ip is not None:
             try:
                 self.out_ip_list[datapath.id].remove(out_ip)
                 match_ip = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_dst=out_ip)
