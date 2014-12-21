@@ -71,7 +71,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
             for dp in self.datapath_list.values():
                 self._request_flow_stats(dp)
                 self._request_port_stats(dp)
-            #add operations to insert and delete monitoring flows entries
+            #add operations to insert and delete monitoring flows entries according the statistics information
             hub.sleep(10)
 
     #packet in
@@ -85,13 +85,18 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
         pkt = packet.Packet(msg.data)
         pkt_ipv4 = pkt.get_protocol(ipv4.ipv4)
         if pkt_ipv4:
-            print type(pkt_ipv4)
-            print pkt_ipv4
-            print pkt_ipv4.src
-            print pkt_ipv4.dst
-            self.ip_list[datapath.id].append(pkt_ipv4.src)
-            self.ip_list[datapath.id].append(pkt_ipv4.dst)
-            self.flow_count[datapath.id].append((pkt_ipv4.src, pkt_ipv4.dst))
+#            print type(pkt_ipv4)
+#            print pkt_ipv4
+#            print pkt_ipv4.src
+#            print pkt_ipv4.dst
+            src = pkt_ipv4.src
+            dst = pkt_ipv4.dst
+            self.ip_list[datapath.id].append(src)
+            self.ip_list[datapath.id].append(dst)
+            self.flow_count[datapath.id].append((src, dst))
+            self.add_monitor(datapath, in_ip=src, out_ip=None)
+            self.add_monitor(datapath, in_ip=None, out_ip=dst)
+            self.add_monitor(datapath, in_ip=src, out_ip=dst)
 
             #register in ip flow entry
             #register out ip flow entry
@@ -184,7 +189,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
         req = parser.OFPPortStatsRequest(datapath, 0, ofproto.OFPP_ANY)
         datapath.send_msg(req)
 
-    def add_monitor(self, datapath, in_ip=None, out_ip=None, hard_time_out=0, dur):
+    def add_monitor(self, datapath, in_ip=None, out_ip=None):
         parser = datapath.ofproto_parser
         if in_ip is None and out_ip is not None:
             self.in_ip_list[datapath.id].append(in_ip)
