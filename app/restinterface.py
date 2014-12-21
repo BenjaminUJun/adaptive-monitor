@@ -36,9 +36,9 @@ class SimpleSwitchRest(adaptivemonitor.AdaptiveMonitor):
         wsgi.register(SimpleSwitchController, {simple_switch_instance_name: self})
 
     @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
-    def switch_features_handler(self, ev):
+    def _switch_features_handler(self, ev):
         logger.info("method SimpleSwitchRest.switch_features_handler")
-        super(SimpleSwitchRest, self).switch_features_handler(ev)
+        super(SimpleSwitchRest, self)._switch_features_handler(ev)
 
     def set_mac_to_port(self, datapathid, entry):
         logger.info("method SimpleSwitchRest.set_mac_to_port")
@@ -87,8 +87,8 @@ class SimpleSwitchController(ControllerBase):
         print "\nssc_init_end\n"
 
     @route('simpleswitch', url, methods=['GET'], requirements={'datapathid': SWITCHID_PATTERN})
-    def list_mac_table(self, req, **kwargs):
-        logger.info("method SimpleSwitchController.list_mac_table")
+    def _list_mac_table(self, req, **kwargs):
+        logger.info("method SimpleSwitchController._list_mac_table")
         simple_switch = self.simple_switch_spp
         datapathid = dpid_lib.str_to_dpid(kwargs['dpid'])
         print "list"
@@ -106,8 +106,8 @@ class SimpleSwitchController(ControllerBase):
         return Response(content_type='application/json', body=body)
 
     @route('simpleswitch', url, methods=['PUT'], requirements={'dpid': SWITCHID_PATTERN})
-    def put_mac_table(self, req, **kwargs):
-        logger.info("method SimpleSwitchController.put_mac_table")
+    def _put_mac_table(self, req, **kwargs):
+        logger.info("method SimpleSwitchController._put_mac_table")
         simple_switch = self.simple_switch_spp
         datapathid = dpid_lib.str_to_dpid(kwargs['dpid'])
         print "\ndpid = "
@@ -145,8 +145,8 @@ class SimpleSwitchController(ControllerBase):
 #            return Response(status=500)
 
     @route('simpleswitch', url2, methods=['PUT'], requirements={'dpid': SWITCHID_PATTERN})
-    def put_stat_info(self, req, **kwargs):
-        logger.info("method SimpleSwitchController.put_stat_info")
+    def _put_stat_info(self, req, **kwargs):
+        logger.info("method SimpleSwitchController._put_stat_info")
         if kwargs['dpid'] == 'all':
             print "allallall"
         else:

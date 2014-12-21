@@ -41,7 +41,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
     @set_ev_cls(ofp_event.EventOFPStateChange, [MAIN_DISPATCHER, DEAD_DISPATCHER])
     def _state_change_handler(self, ev):
         logger.info("method AdaptiveMonitor._state_change_handler")
-        super(AdaptiveMonitor, self)._state_change_handler(self, ev)
+        super(AdaptiveMonitor, self)._state_change_handler(ev)
         datapath = ev.datapath
         if ev.state == MAIN_DISPATCHER:
             if not datapath.id in self.datapath_list:

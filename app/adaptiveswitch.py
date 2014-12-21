@@ -44,7 +44,7 @@ class AdaptiveSwitch(app_manager.RyuApp):
     #switch init
     @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
     def _switch_features_handler(self, ev):
-        logger.info("method AdaptiveSwitch._switch_features_handler datapath = %16d" % ev.datapath.id)
+        logger.info("method AdaptiveSwitch._switch_features_handler datapath = %16d" % ev.msg.datapath.id)
         datapath = ev.msg.datapath
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
