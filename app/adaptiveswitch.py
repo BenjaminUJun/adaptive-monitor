@@ -102,6 +102,9 @@ class AdaptiveSwitch(app_manager.RyuApp):
             print "add flow add flow"
             print "add flow add flow"
             match = parser.OFPMatch(in_port=in_port, eth_dst=dst)
+            print datapath.id
+            print utils.to_string(match_ip)
+            print utils.to_string(inst)
             self.add_flow(datapath, 3, 2, match, inst)
 
         data = None
