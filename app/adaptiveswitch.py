@@ -12,7 +12,7 @@ from ryu.lib.packet import packet, ethernet, ipv4
 
 
 logger = logging.getLogger()
-logging.basicConfig(level=logging.DEBUG,
+logger.basicConfig(level=logging.DEBUG,
                     format="[%(levelname)s %(asctime)s] %(name)s:: %(message)s")
 
 

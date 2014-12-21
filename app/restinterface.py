@@ -16,7 +16,7 @@ import utils
 
 
 logger = logging.getLogger()
-logging.basicConfig(level=logging.DEBUG,
+logger.basicConfig(level=logging.DEBUG,
                     format="[%(levelname)s %(asctime)s] %(name)s:: %(message)s")
 
 simple_switch_instance_name = 'simple_switch_api_app'
