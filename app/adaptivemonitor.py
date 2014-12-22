@@ -24,7 +24,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
 #                            datefmt='%Y%m%d %H:%M:%S')
 
         console = logging.StreamHandler()
-        console.setLevel(logging.INFO)
+        console.setLevel(logging.DEBUG)
         formatter = logging.Formatter("[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s")
         console.setFormatter(formatter)
         logging.getLogger('AdaptiveMonitor').addHandler(console)
