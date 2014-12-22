@@ -23,15 +23,15 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
         #                            format="[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s",
         #                            datefmt='%Y%m%d %H:%M:%S')
 
-#        logger = logging.getLogger("AdaptiveMonitor")
-#        console = logging.StreamHandler()
-#        console.setLevel(logging.DEBUG)
-#        formatter = logging.Formatter('[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s',
-#                                      '%Y%m%d %H:%M:%S')
-#        console.setFormatter(formatter)
-#        logger.addHandler(console)
+        self.logger = logging.getLogger("AdaptiveMonitor")
+        console = logging.StreamHandler()
+        console.setLevel(logging.DEBUG)
+        formatter = logging.Formatter('[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s',
+                                      '%Y%m%d %H:%M:%S')
+        console.setFormatter(formatter)
+        self.logger.addHandler(console)
 
-#        logger.info("")
+        self.logger.info("")
         super(AdaptiveMonitor, self).__init__(*args, **kwargs)
         self.datapath_list_monitor = {}
         self.port_list = {}
@@ -48,7 +48,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
     #switch register
     @set_ev_cls(ofp_event.EventOFPStateChange, [MAIN_DISPATCHER, DEAD_DISPATCHER])
     def _state_change_handler(self, ev):
-        logging.info("method AdaptiveMonitor._state_change_handler")
+        self.logger.info("method AdaptiveMonitor._state_change_handler")
         super(AdaptiveMonitor, self)._state_change_handler(ev)
         datapath = ev.datapath
         if ev.state == MAIN_DISPATCHER:
@@ -73,7 +73,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
 
     #monitor thread
     def _monitor(self):
-        logging.info("method AdaptiveMonitor._monitor")
+        self.logger.info("method AdaptiveMonitor._monitor")
         while True:
             print "in _monitor function"
             for dp in self.datapath_list.values():
@@ -87,7 +87,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
     #packet in
     @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
     def _packet_in_handler(self, ev):
-        logging.info("method AdaptiveMonitor._packet_in_handler")
+        self.logger.info("method AdaptiveMonitor._packet_in_handler")
         super(AdaptiveMonitor, self)._packet_in_handler(ev)
         msg = ev.msg
         datapath = msg.datapath
@@ -135,7 +135,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
     #flow status receiver
     @set_ev_cls(ofp_event.EventOFPFlowStatsReply, MAIN_DISPATCHER)
     def _flow_stats_reply_handler(self, ev):
-        logging.info("method AdaptiveMonitor._flow_stats_reply_handler")
+        self.logger.info("method AdaptiveMonitor._flow_stats_reply_handler")
         flows = []
         for stat in ev.msg.body:
             flows.append('table_id=%s '
@@ -149,10 +149,10 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
                           stat.instructions))
         print flows
         print "\n\n"
-        logging.debug('FlowStats: %s', flows)
+        self.logger.debug('FlowStats: %s', flows)
         body = ev.msg.body
-        logging.debug('datapath         in-port  eth-dst           out-port packets  bytes   ')
-        logging.debug('---------------- -------- ----------------- -------- -------- --------')
+        self.logger.debug('datapath         in-port  eth-dst           out-port packets  bytes   ')
+        self.logger.debug('---------------- -------- ----------------- -------- -------- --------')
         for flow in body:
             print flow
             print flow.match
@@ -169,13 +169,13 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
             #        filter_flow_table = [flow for flow in body if "in_port" in flow.match and "eth_dst" in flow.match]
             #        print "filter_flow_table =", filter_flow_table
             #        for stat in sorted(filter_flow_table, key=lambda f: (f.match['in_port'], f.match['eth_dst'])):
-            #            logging.debug('%016x %8x %17s %8x %8d %8d', ev.msg.datapath.id, stat.match['in_port'], stat.match['eth_dst'],
+            #            self.logger.debug('%016x %8x %17s %8x %8d %8d', ev.msg.datapath.id, stat.match['in_port'], stat.match['eth_dst'],
             #                         stat.instructions[0].actions[0].port, stat.packet_count, stat.byte_count)
 
     #port status receiver
     @set_ev_cls(ofp_event.EventOFPPortStatsReply, MAIN_DISPATCHER)
     def _port_stats_reply_handler(self, ev):
-        logging.info("method AdaptiveMonitor._port_stats_reply_handler")
+        self.logger.info("method AdaptiveMonitor._port_stats_reply_handler")
         ports = []
         for stat in ev.msg.body:
             ports.append('port_no=%d '
@@ -190,19 +190,19 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
                           stat.rx_crc_err, stat.collisions, stat.duration_sec, stat.duration_nsec))
         print ports
         #       print "\n\n"
-        #       logging.debug('PortStats: %s', ports)
+        #       self.logger.debug('PortStats: %s', ports)
         body = ev.msg.body
         #       #        filter_flow_table = filter([flow for flow in body], flow.hasattr('inport') and flow.hasattr("eth_dst"))
-        #       logging.debug('datapath         port     rx-pkts  rx-bytes rx-error tx-pkts  tx-bytes tx-error')
-        #       logging.debug('---------------- -------- -------- -------- -------- -------- -------- --------')
+        #       self.logger.debug('datapath         port     rx-pkts  rx-bytes rx-error tx-pkts  tx-bytes tx-error')
+        #       self.logger.debug('---------------- -------- -------- -------- -------- -------- -------- --------')
         #        for stat in sorted(body, key=attrgetter('port_no')):
         #       for stat in sorted(body, key=lambda l: l.port_no):
-        #           logging.info('%016x %8x %8d %8d %8d %8d %8d %8d', ev.msg.datapath.id, stat.port_no, stat.rx_packets,
+        #           self.logger.info('%016x %8x %8d %8d %8d %8d %8d %8d', ev.msg.datapath.id, stat.port_no, stat.rx_packets,
         #               stat.rx_bytes, stat.rx_errors, stat.tx_packets, stat.tx_bytes, stat.tx_errors)
 
     @staticmethod
     def _request_flow_stats(datapath):
-        logging.info("method AdaptiveMonitor._request_flow_stats datapath = %16x" % datapath.id)
+        self.logger.info("method AdaptiveMonitor._request_flow_stats datapath = %16x" % datapath.id)
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
 
@@ -211,7 +211,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
 
     @staticmethod
     def _request_port_stats(datapath):
-        logging.info("method AdaptiveMonitor._request_port_stats datapath = %16x" % datapath.id)
+        self.logger.info("method AdaptiveMonitor._request_port_stats datapath = %16x" % datapath.id)
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
 
@@ -253,7 +253,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
                 match_ip = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_src=in_ip)
                 self.del_flow(datapath, match_ip)
             except ValueError as ex:
-                logging.exception("del_flow for in_ip = %s on %16xd failed" % (in_ip, datapath.id))
+                self.logger.exception("del_flow for in_ip = %s on %16xd failed" % (in_ip, datapath.id))
             return
         if in_ip is None and out_ip is not None:
             try:
@@ -261,7 +261,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
                 match_ip = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_dst=out_ip)
                 self.del_flow(datapath, match_ip)
             except ValueError as ex:
-                logging.exception("del_flow for out_ip = %s on %16xd failed" % (in_ip, datapath.id))
+                self.logger.exception("del_flow for out_ip = %s on %16xd failed" % (in_ip, datapath.id))
             return
         if in_ip is not None and out_ip is not None:
             try:
@@ -269,6 +269,6 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
                 match_ip = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_src=in_ip, ipv4_dst=out_ip)
                 self.del_flow(datapath, match_ip)
             except ValueError as ex:
-                logging.exception(
+                self.logger.exception(
                     "del_flow for (ip_in = %s, out_ip = %s) on %16xd failed" % (in_ip, out_ip, datapath.id))
             return
