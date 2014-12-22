@@ -23,16 +23,15 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
         #                            format="[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s",
         #                            datefmt='%Y%m%d %H:%M:%S')
 
-        self.logger = logging.getLogger("AdaptiveMonitor")
-        logging.basicConfig(level=logging.DEBUG, format='[%(levelname)s %(asctime)s] %(name)s:: %(message)s',
-                            datefmt='%Y%m%d %H:%M:%S')
-
-        #        console = logging.StreamHandler()
-        #        console.setLevel(logging.DEBUG)
-        #        formatter = logging.Formatter('[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s',
-        #                                      '%Y%m%d %H:%M:%S')
-        #        console.setFormatter(formatter)
-        #        self.logger.addHandler(console)
+        self.logger = logging.getLogger("app.AdaptiveMonitor")
+        console = logging.StreamHandler()
+        console.setLevel(logging.DEBUG)
+        formatter = logging.Formatter('[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s',
+                                      '%Y%m%d %H:%M:%S')
+        console.setFormatter(formatter)
+        hd_filter = logging.Filter('app')
+        console.addFilter(hd_filter)
+        self.logger.addHandler(console)
 
         self.logger.info("")
         super(AdaptiveMonitor, self).__init__(*args, **kwargs)
@@ -169,11 +168,11 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
             except Exception as ex:
                 print flow.match
 
-                #        filter_flow_table = [flow for flow in body if "in_port" in flow.match and "eth_dst" in flow.match]
-                #        print "filter_flow_table =", filter_flow_table
-                #        for stat in sorted(filter_flow_table, key=lambda f: (f.match['in_port'], f.match['eth_dst'])):
-                #            self.logger.debug('%016x %8x %17s %8x %8d %8d', ev.msg.datapath.id, stat.match['in_port'], stat.match['eth_dst'],
-                #                         stat.instructions[0].actions[0].port, stat.packet_count, stat.byte_count)
+            #        filter_flow_table = [flow for flow in body if "in_port" in flow.match and "eth_dst" in flow.match]
+            #        print "filter_flow_table =", filter_flow_table
+            #        for stat in sorted(filter_flow_table, key=lambda f: (f.match['in_port'], f.match['eth_dst'])):
+            #            self.logger.debug('%016x %8x %17s %8x %8d %8d', ev.msg.datapath.id, stat.match['in_port'], stat.match['eth_dst'],
+            #                         stat.instructions[0].actions[0].port, stat.packet_count, stat.byte_count)
 
     #port status receiver
     @set_ev_cls(ofp_event.EventOFPPortStatsReply, MAIN_DISPATCHER)
