@@ -29,7 +29,8 @@ class SimpleSwitchRest(adaptivemonitor.AdaptiveMonitor):
         logging.basicConfig(level=logging.DEBUG,
                             format="[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s",
                             datefmt='%Y%m%d %H:%M:%S')
-        logging.info("method SimpleSwitchRest.__init__")
+        logger = logging.getLogger("")
+        logger.info("method AdaptiveMonitor.__init__")
         super(SimpleSwitchRest, self).__init__(*args, **kwargs)
 ###        self.switches = {}
         wsgi = kwargs['wsgi']

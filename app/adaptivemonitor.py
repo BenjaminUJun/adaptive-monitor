@@ -22,7 +22,8 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
         logging.basicConfig(level=logging.DEBUG,
                             format="[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s",
                             datefmt='%Y%m%d %H:%M:%S')
-        logging.info("method AdaptiveMonitor.__init__")
+        logger = logging.getLogger("")
+        logger.info("method AdaptiveMonitor.__init__")
         super(AdaptiveMonitor, self).__init__(*args, **kwargs)
         self.datapath_list_monitor = {}
         self.port_list = {}
@@ -145,7 +146,6 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
         logging.debug('datapath         in-port  eth-dst           out-port packets  bytes   ')
         logging.debug('---------------- -------- ----------------- -------- -------- --------')
         for flow in body:
-            print "bbbbssss"
             print flow
             print flow.match
             print type(flow.match)
