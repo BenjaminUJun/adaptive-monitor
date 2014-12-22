@@ -10,10 +10,9 @@ from ryu.ofproto import ofproto_v1_3, ofproto_v1_3_parser, ether
 from ryu.lib import ofctl_v1_3
 from ryu.lib.packet import packet, ethernet, ipv4
 
-import utils
+MTN = 0
 
-
-class AdaptiveSwitch(app_manager.RyuApp):
+class TableDelayTest(app_manager.RyuApp):
     OFP_VERSIONS = [ofproto_v1_3.OFP_VERSION]
 
     def __init__(self, *args, **kwargs):
@@ -42,14 +41,14 @@ class AdaptiveSwitch(app_manager.RyuApp):
 
         match_empty = parser.OFPMatch()
         actions = [parser.OFPActionOutput(self.MIRROR_PORT)]
-        for i in range(0, 3):
+        for i in range(0, MTN):
             inst = [parser.OFPInstructionGotoTable(i + 1),
                     parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)]
             self.add_flow(datapath, i, 0, match_empty, inst)
 
         actions = [parser.OFPActionOutput(ofproto.OFPP_CONTROLLER, ofproto.OFPCML_NO_BUFFER)]
         inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)]
-        self.add_flow(datapath, 3, 0, match_empty, inst)
+        self.add_flow(datapath, MTN, 0, match_empty, inst)
 
     #packet in
     @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
@@ -77,7 +76,7 @@ class AdaptiveSwitch(app_manager.RyuApp):
 
         if out_port != ofproto.OFPP_FLOOD:
             match = parser.OFPMatch(in_port=in_port, eth_dst=dst)
-            self.add_flow(datapath, 3, 2, match, inst)
+            self.add_flow(datapath, MTN, 2, match, inst)
 
         data = None
         if msg.buffer_id == ofproto.OFP_NO_BUFFER:
