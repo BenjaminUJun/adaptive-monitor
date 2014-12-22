@@ -95,6 +95,11 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
 #            print pkt_ipv4.dst
             src = pkt_ipv4.src
             dst = pkt_ipv4.dst
+            print "ipv4 ",
+            print src
+            print "ipv4 ",
+            print dst
+            print "ipv4"
             self.ip_list[datapath.id].append(src)
             self.ip_list[datapath.id].append(dst)
 #            self.in_ip_list[datapath.id].append(src)
@@ -153,11 +158,11 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
             except Exception as ex:
                 print flow.match
 
-        filter_flow_table = [flow for flow in body if "in_port" in flow.match and "eth_dst" in flow.match]
-        print "filter_flow_table =", filter_flow_table
-        for stat in sorted(filter_flow_table, key=lambda f: (f.match['in_port'], f.match['eth_dst'])):
-            logging.debug('%016x %8x %17s %8x %8d %8d', ev.msg.datapath.id, stat.match['in_port'], stat.match['eth_dst'],
-                         stat.instructions[0].actions[0].port, stat.packet_count, stat.byte_count)
+#        filter_flow_table = [flow for flow in body if "in_port" in flow.match and "eth_dst" in flow.match]
+#        print "filter_flow_table =", filter_flow_table
+#        for stat in sorted(filter_flow_table, key=lambda f: (f.match['in_port'], f.match['eth_dst'])):
+#            logging.debug('%016x %8x %17s %8x %8d %8d', ev.msg.datapath.id, stat.match['in_port'], stat.match['eth_dst'],
+#                         stat.instructions[0].actions[0].port, stat.packet_count, stat.byte_count)
 
     #port status receiver
     @set_ev_cls(ofp_event.EventOFPPortStatsReply, MAIN_DISPATCHER)
@@ -176,16 +181,16 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
                           stat.tx_dropped, stat.rx_errors, stat.tx_errors, stat.rx_frame_err, stat.rx_over_err,
                           stat.rx_crc_err, stat.collisions, stat.duration_sec, stat.duration_nsec))
         print ports
-        print "\n\n"
-        logging.debug('PortStats: %s', ports)
+ #       print "\n\n"
+ #       logging.debug('PortStats: %s', ports)
         body = ev.msg.body
-        #        filter_flow_table = filter([flow for flow in body], flow.hasattr('inport') and flow.hasattr("eth_dst"))
-        logging.debug('datapath         port     rx-pkts  rx-bytes rx-error tx-pkts  tx-bytes tx-error')
-        logging.debug('---------------- -------- -------- -------- -------- -------- -------- --------')
+ #       #        filter_flow_table = filter([flow for flow in body], flow.hasattr('inport') and flow.hasattr("eth_dst"))
+ #       logging.debug('datapath         port     rx-pkts  rx-bytes rx-error tx-pkts  tx-bytes tx-error')
+ #       logging.debug('---------------- -------- -------- -------- -------- -------- -------- --------')
         #        for stat in sorted(body, key=attrgetter('port_no')):
         for stat in sorted(body, key=lambda l: l.port_no):
-            logging.info('%016x %8x %8d %8d %8d %8d %8d %8d', ev.msg.datapath.id, stat.port_no, stat.rx_packets,
-                        stat.rx_bytes, stat.rx_errors, stat.tx_packets, stat.tx_bytes, stat.tx_errors)
+    #        logging.info('%016x %8x %8d %8d %8d %8d %8d %8d', ev.msg.datapath.id, stat.port_no, stat.rx_packets,
+ #               stat.rx_bytes, stat.rx_errors, stat.tx_packets, stat.tx_bytes, stat.tx_errors)
 
     @staticmethod
     def _request_flow_stats(datapath):
