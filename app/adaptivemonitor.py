@@ -17,13 +17,11 @@ import adaptiveswitch
 import utils
 
 
-logging.basicConfig(level=logging.DEBUG,
-                    format="[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s",
-                    datefmt='%Y%m%d %H:%M:%S')
-
-
 class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
     def __init__(self, *args, **kwargs):
+        logging.basicConfig(level=logging.DEBUG,
+                            format="[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s",
+                            datefmt='%Y%m%d %H:%M:%S')
         logging.info("method AdaptiveMonitor.__init__")
         super(AdaptiveMonitor, self).__init__(*args, **kwargs)
         self.datapath_list_monitor = {}
@@ -217,15 +215,6 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
             return
         if in_ip is None and out_ip is not None:
             self.out_ip_list[datapath.id].append(out_ip)
-            print "aaa"
-            print out_ip
-            print "aaa"
-            print type(out_ip)
-            print "aaa"
-            print out_ip.__str__
-            print "aaa"
-            print str(out_ip)
-            print "aaa"
             match_ip = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_dst=out_ip)
             inst = [parser.OFPInstructionGotoTable(2)]
 #            print "datapath.id = ",

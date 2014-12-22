@@ -15,10 +15,6 @@ import adaptivemonitor
 import utils
 
 
-logging.basicConfig(level=logging.DEBUG,
-                    format="[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s",
-                    datefmt='%Y%m%d %H:%M:%S')
-
 simple_switch_instance_name = 'simple_switch_api_app'
 url = '/simpleswitch/mactable/{dpid}'
 url2 = '/simpleswitch/statinfo/{dpid}'
@@ -30,6 +26,9 @@ class SimpleSwitchRest(adaptivemonitor.AdaptiveMonitor):
     _CONTEXTS = {'wsgi' : WSGIApplication}
 
     def __init__(self, *args, **kwargs):
+        logging.basicConfig(level=logging.DEBUG,
+                            format="[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s",
+                            datefmt='%Y%m%d %H:%M:%S')
         logging.info("method SimpleSwitchRest.__init__")
         super(SimpleSwitchRest, self).__init__(*args, **kwargs)
 ###        self.switches = {}

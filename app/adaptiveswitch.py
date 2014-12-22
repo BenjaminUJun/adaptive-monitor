@@ -12,16 +12,15 @@ from ryu.lib.packet import packet, ethernet, ipv4
 
 import utils
 
-logging.basicConfig(level=logging.DEBUG,
-                    format="[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s",
-                    datefmt='%Y%m%d %H:%M:%S')
-
 
 class AdaptiveSwitch(app_manager.RyuApp):
     OFP_VERSIONS = [ofproto_v1_3.OFP_VERSION]
     MIRROR_PORT = 25
 
     def __init__(self, *args, **kwargs):
+        logging.basicConfig(level=logging.DEBUG,
+                            format="[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s",
+                            datefmt='%Y%m%d %H:%M:%S')
         logging.info("method AdaptiveSwitch.__init__")
         super(AdaptiveSwitch, self).__init__(*args, **kwargs)
         self.datapath_list = {}
@@ -52,7 +51,7 @@ class AdaptiveSwitch(app_manager.RyuApp):
         parser = datapath.ofproto_parser
 
         actions = [parser.OFPActionOutput(1)]
-        match_ip = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_src='10.10.10.10')
+        match_ip = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_src='10.3.0.123', ipv4_dst='10.3.0.124')
         inst = [parser.OFPInstructionGotoTable(1), parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)]
         self.add_flow(datapath, 0, 3, match_ip, inst)
 
@@ -87,10 +86,6 @@ class AdaptiveSwitch(app_manager.RyuApp):
 
         logging.info("packet in %d %s %s %d" % (datapath.id, src, dst, in_port))
         print "packet in %d %s %s %d" % (datapath.id, src, dst, in_port)
-        print "in switch packet in "
-        print "in switch packet in "
-        print "in switch packet in "
-        print "in switch packet in "
 
         self.mac_to_port[datapath.id][src] = in_port
 
@@ -103,10 +98,6 @@ class AdaptiveSwitch(app_manager.RyuApp):
         inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)]
 
         if out_port != ofproto.OFPP_FLOOD:
-            print "add flow add flow"
-            print "add flow add flow"
-            print "add flow add flow"
-            print "add flow add flow"
             match = parser.OFPMatch(in_port=in_port, eth_dst=dst)
             print "datapath.id = ",
             print datapath.id
