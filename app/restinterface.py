@@ -22,24 +22,24 @@ SWITCHID_PATTERN = dpid_lib.DPID_PATTERN + r'|all'
 
 
 class SimpleSwitchRest(adaptivemonitor.AdaptiveMonitor):
-
-    _CONTEXTS = {'wsgi' : WSGIApplication}
+    _CONTEXTS = {'wsgi': WSGIApplication}
 
     def __init__(self, *args, **kwargs):
-#        logging.basicConfig(level=logging.DEBUG,
-#                            format="[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s",
-#                            datefmt='%Y%m%d %H:%M:%S')
+        #        logging.basicConfig(level=logging.DEBUG,
+        #                            format="[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s",
+        #                            datefmt='%Y%m%d %H:%M:%S')
 
         logger = logging.getLogger("SimpleSwitchRest")
         console = logging.StreamHandler()
         console.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s', '%Y%m%d %H:%M:%S')
+        formatter = logging.Formatter('[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s',
+                                      '%Y%m%d %H:%M:%S')
         console.setFormatter(formatter)
         logger.addHandler(console)
 
         logger.info("")
         super(SimpleSwitchRest, self).__init__(*args, **kwargs)
-###        self.switches = {}
+        ###        self.switches = {}
         wsgi = kwargs['wsgi']
         wsgi.register(SimpleSwitchController, {simple_switch_instance_name: self})
 
@@ -92,17 +92,16 @@ class SimpleSwitchController(ControllerBase):
         print 6790874762851226928 in self.simple_switch_spp.mac_to_port
         print int('5e3e089e01a7de53', 16) in self.simple_switch_spp.mac_to_port
 
-        print "\nssc_init_end\n"
 
     @route('simpleswitch', url, methods=['GET'], requirements={'datapathid': SWITCHID_PATTERN})
     def _list_mac_table(self, req, **kwargs):
         logging.info("method SimpleSwitchController._list_mac_table")
         simple_switch = self.simple_switch_spp
         datapathid = dpid_lib.str_to_dpid(kwargs['dpid'])
-#        print "list"
-#        print simple_switch
-#        print "list_mac_table"
-#        print "\n"
+        #        print "list"
+        #        print simple_switch
+        #        print "list_mac_table"
+        #        print "\n"
         if datapathid not in simple_switch.mac_to_port:
             return Response(status=404)
 
@@ -118,23 +117,23 @@ class SimpleSwitchController(ControllerBase):
         logging.info("method SimpleSwitchController._put_mac_table")
         simple_switch = self.simple_switch_spp
         datapathid = dpid_lib.str_to_dpid(kwargs['dpid'])
-#        print "\ndpid = "
-#        print datapathid
-#        print "\n"
+        #        print "\ndpid = "
+        #        print datapathid
+        #        print "\n"
         new_entry = eval(req.body)
-#        print "new_entry=", new_entry
-#        print "put"
-#        print simple_switch.mac_to_port
+        #        print "new_entry=", new_entry
+        #        print "put"
+        #        print simple_switch.mac_to_port
 
-#        print "list_mac_table"
-#        print simple_switch.mac_to_port[datapathid]
-#        print "\n"
+        #        print "list_mac_table"
+        #        print simple_switch.mac_to_port[datapathid]
+        #        print "\n"
 
         if not datapathid in simple_switch.mac_to_port:
             print "404"
             return Response(status=404)
 
-#        try:
+        #        try:
         if True:
             print "dpid %16x" % (datapathid,)
             print new_entry
@@ -146,11 +145,11 @@ class SimpleSwitchController(ControllerBase):
             print body
             print "\n"
             return Response(content_type='application/json', body=body)
-#        except Exception as e:
-#            print "exception"
-#            print e
-#            raise e
-#            return Response(status=500)
+        #        except Exception as e:
+        #            print "exception"
+        #            print e
+        #            raise e
+        #            return Response(status=500)
 
     @route('simpleswitch', url2, methods=['PUT'], requirements={'dpid': SWITCHID_PATTERN})
     def _put_stat_info(self, req, **kwargs):

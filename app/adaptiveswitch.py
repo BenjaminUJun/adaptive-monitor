@@ -18,18 +18,19 @@ class AdaptiveSwitch(app_manager.RyuApp):
     MIRROR_PORT = 25
 
     def __init__(self, *args, **kwargs):
-#        logging.basicConfig(level=logging.DEBUG,
-#                            format="[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s",
-#                            datefmt='%Y%m%d %H:%M:%S')
+        #        logging.basicConfig(level=logging.DEBUG,
+        #                            format="[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s",
+        #                            datefmt='%Y%m%d %H:%M:%S')
 
-        logger = logging.getLogger("AdaptiveSwitch")
-        console = logging.StreamHandler()
-        console.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s', '%Y%m%d %H:%M:%S')
-        console.setFormatter(formatter)
-        logger.addHandler(console)
+#        logger = logging.getLogger("AdaptiveSwitch")
+#        console = logging.StreamHandler()
+#        console.setLevel(logging.DEBUG)
+#        formatter = logging.Formatter('[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s',
+#                                      '%Y%m%d %H:%M:%S')
+#        console.setFormatter(formatter)
+#        logger.addHandler(console)
 
-        logger.info("")
+#        logger.info("")
         super(AdaptiveSwitch, self).__init__(*args, **kwargs)
         self.datapath_list = {}
         self.mac_to_port = {}
@@ -61,7 +62,7 @@ class AdaptiveSwitch(app_manager.RyuApp):
         actions = [parser.OFPActionOutput(1)]
         match_ip = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_src='10.3.0.123', ipv4_dst='10.3.0.124')
         inst = [parser.OFPInstructionGotoTable(1), parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)]
-#        self.add_flow(datapath, 0, 5, match_ip, inst)
+        #        self.add_flow(datapath, 0, 5, match_ip, inst)
 
         match_empty = parser.OFPMatch()
         actions = [parser.OFPActionOutput(self.MIRROR_PORT)]
