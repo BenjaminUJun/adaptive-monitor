@@ -53,7 +53,8 @@ class AdaptiveSwitch(app_manager.RyuApp):
         actions = [parser.OFPActionOutput(1)]
         match_ip = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_src='10.3.0.123', ipv4_dst='10.3.0.124')
         inst = [parser.OFPInstructionGotoTable(1), parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)]
-        self.add_flow(datapath, 0, 5, match_ip, inst)
+#        self.add_flow(datapath, 0, 5, match_ip, inst)
+        self.add_flow(datapath, 1, 5, match_ip, inst)
 
         match_empty = parser.OFPMatch()
         actions = [parser.OFPActionOutput(self.MIRROR_PORT)]
@@ -69,9 +70,6 @@ class AdaptiveSwitch(app_manager.RyuApp):
     #packet in
     @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
     def _packet_in_handler(self, ev):
-        logging.info("method AdaptiveSwitch._packet_in_handler datapath = %16d" % ev.msg.datapath.id)
-        logging.info("method AdaptiveSwitch._packet_in_handler datapath = %16d" % ev.msg.datapath.id)
-        logging.info("method AdaptiveSwitch._packet_in_handler datapath = %16d" % ev.msg.datapath.id)
         logging.info("method AdaptiveSwitch._packet_in_handler datapath = %16d" % ev.msg.datapath.id)
         msg = ev.msg
         datapath = msg.datapath

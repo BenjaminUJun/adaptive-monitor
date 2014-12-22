@@ -216,7 +216,8 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
             self.in_ip_list[datapath.id].append(in_ip)
             match_ip = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_src=in_ip)
             inst = [parser.OFPInstructionGotoTable(1)]
-            self.add_flow(datapath, 0, 3, match_ip, inst)
+#            self.add_flow(datapath, 0, 3, match_ip, inst)
+            self.add_flow(datapath, 1, 3, match_ip, inst)
             return
         if in_ip is None and out_ip is not None:
             self.out_ip_list[datapath.id].append(out_ip)
@@ -228,7 +229,8 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
 #            print utils.to_string(match_ip)
 #            print "inst = ",
 #            print utils.to_string(inst)
-            self.add_flow(datapath, 1, 3, match_ip, inst)
+#            self.add_flow(datapath, 1, 3, match_ip, inst)
+            self.add_flow(datapath, 0, 3, match_ip, inst)
             return
         if in_ip is not None and out_ip is not None:
             self.in_out_ip_list[datapath.id].append((in_ip, out_ip))
