@@ -57,10 +57,10 @@ class AdaptiveSwitch(app_manager.RyuApp):
 
         match_empty = parser.OFPMatch()
         actions = [parser.OFPActionOutput(self.MIRROR_PORT)]
-        for i in range(0, 3):
-            inst = [parser.OFPInstructionGotoTable(i + 1),
-                    parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)]
-            self.add_flow(datapath, i, 0, match_empty, inst)
+#        for i in range(0, 3):
+#            inst = [parser.OFPInstructionGotoTable(i + 1),
+#                    parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)]
+#            self.add_flow(datapath, i, 0, match_empty, inst)
 
         actions = [parser.OFPActionOutput(ofproto.OFPP_CONTROLLER, ofproto.OFPCML_NO_BUFFER)]
         inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)]
