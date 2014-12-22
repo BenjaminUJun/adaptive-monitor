@@ -18,10 +18,16 @@ class AdaptiveSwitch(app_manager.RyuApp):
     MIRROR_PORT = 25
 
     def __init__(self, *args, **kwargs):
-        logging.basicConfig(level=logging.DEBUG,
-                            format="[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s",
-                            datefmt='%Y%m%d %H:%M:%S')
-        logger = logging.getLogger("")
+#        logging.basicConfig(level=logging.DEBUG,
+#                            format="[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s",
+#                            datefmt='%Y%m%d %H:%M:%S')
+
+        console = logging.StreamHandler()
+        console.setLevel(logging.INFO)
+        formatter = logging.Formatter("[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s")
+        console.setFormatter(formatter)
+        logger = logging.getLogger('').addHandler(console)
+
         logger.info("method AdaptiveMonitor.__init__")
         super(AdaptiveSwitch, self).__init__(*args, **kwargs)
         self.datapath_list = {}
