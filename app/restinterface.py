@@ -30,13 +30,15 @@ class SimpleSwitchRest(adaptivemonitor.AdaptiveMonitor):
 #                            format="[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s",
 #                            datefmt='%Y%m%d %H:%M:%S')
 
+        logger = logging.getLogger("SimpleSwitchRest")
         console = logging.StreamHandler()
         console.setLevel(logging.DEBUG)
         formatter = logging.Formatter("[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s")
         console.setFormatter(formatter)
-        logging.getLogger('SimpleSwitchRest').addHandler(console)
+        logging.addHandler(console)
+        logger.addHandler(console)
 
-        logging.info("method AdaptiveMonitor.__init__")
+        logger.info("method AdaptiveMonitor.__init__")
         super(SimpleSwitchRest, self).__init__(*args, **kwargs)
 ###        self.switches = {}
         wsgi = kwargs['wsgi']

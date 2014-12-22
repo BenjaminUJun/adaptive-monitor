@@ -27,7 +27,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
         console.setLevel(logging.DEBUG)
         formatter = logging.Formatter("[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s")
         console.setFormatter(formatter)
-        logging.getLogger('AdaptiveMonitor').addHandler(console)
+        logging.getLogger('').addHandler(console)
         logging.info("method AdaptiveMonitor.__init__")
         super(AdaptiveMonitor, self).__init__(*args, **kwargs)
         self.datapath_list_monitor = {}

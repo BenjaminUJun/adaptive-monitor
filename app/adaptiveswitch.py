@@ -26,7 +26,7 @@ class AdaptiveSwitch(app_manager.RyuApp):
         console.setLevel(logging.DEBUG)
         formatter = logging.Formatter("[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s")
         console.setFormatter(formatter)
-        logging.getLogger('AdaptiveSwitch').addHandler(console)
+        logging.getLogger('').addHandler(console)
 
         logging.info("method AdaptiveMonitor.__init__")
         super(AdaptiveSwitch, self).__init__(*args, **kwargs)
