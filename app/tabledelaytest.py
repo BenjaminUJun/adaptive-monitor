@@ -41,10 +41,10 @@ class TableDelayTest(app_manager.RyuApp):
         parser = datapath.ofproto_parser
 
         match_empty = parser.OFPMatch()
-        actions = [parser.OFPActionOutput(self.MIRROR_PORT)]
+#        actions = [parser.OFPActionOutput(self.MIRROR_PORT)]
         for i in range(0, MTN):
-            inst = [parser.OFPInstructionGotoTable(i + 1),
-                    parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)]
+            inst = [parser.OFPInstructionGotoTable(i + 1)]
+#                    parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)]
             self.add_flow(datapath, i, 0, match_empty, inst)
 
         actions = [parser.OFPActionOutput(ofproto.OFPP_CONTROLLER, ofproto.OFPCML_NO_BUFFER)]
