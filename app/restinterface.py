@@ -30,12 +30,15 @@ class SimpleSwitchRest(adaptivemonitor.AdaptiveMonitor):
         #                            datefmt='%Y%m%d %H:%M:%S')
 
         self.logger = logging.getLogger("SimpleSwitchRest")
-        console = logging.StreamHandler()
-        console.setLevel(logging.DEBUG)
-        formatter = logging.Formatter(fmt='[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s',
-                                      datefmt='%Y%m%d %H:%M:%S')
-        console.setFormatter(formatter)
-        self.logger.addHandler(console)
+        logging.basicConfig(level=logging.DEBUG, format='[%(levelname)s %(asctime)s] %(name)s:: %(message)s',
+                            datefmt='%Y%m%d %H:%M:%S')
+
+        #        console = logging.StreamHandler()
+        #        console.setLevel(logging.DEBUG)
+        #        formatter = logging.Formatter('[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s',
+        #                                      '%Y%m%d %H:%M:%S')
+        #        console.setFormatter(formatter)
+        #        self.logger.addHandler(console)
 
         self.logger.info("")
         super(SimpleSwitchRest, self).__init__(*args, **kwargs)
