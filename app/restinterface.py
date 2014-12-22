@@ -34,9 +34,9 @@ class SimpleSwitchRest(adaptivemonitor.AdaptiveMonitor):
         console.setLevel(logging.INFO)
         formatter = logging.Formatter("[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s")
         console.setFormatter(formatter)
-        logger = logging.getLogger('').addHandler(console)
+        logging.getLogger('').addHandler(console)
 
-        logger.info("method AdaptiveMonitor.__init__")
+        logging.info("method AdaptiveMonitor.__init__")
         super(SimpleSwitchRest, self).__init__(*args, **kwargs)
 ###        self.switches = {}
         wsgi = kwargs['wsgi']
