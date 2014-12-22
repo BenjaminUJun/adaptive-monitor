@@ -49,7 +49,7 @@ class SimpleSwitchRest(adaptivemonitor.AdaptiveMonitor):
         super(SimpleSwitchRest, self)._switch_features_handler(ev)
 
     def set_mac_to_port(self, datapathid, entry):
-        logging.info("method SimpleSwitchRest.set_mac_to_port")
+        self.logger.info("method SimpleSwitchRest.set_mac_to_port")
         mac_table = self.mac_to_port.setdefault(datapathid, {})
         datapath = self.datapath_list[datapathid]
         ofproto = datapath.ofproto

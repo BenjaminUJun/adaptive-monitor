@@ -42,12 +42,12 @@ class AdaptiveSwitch(app_manager.RyuApp):
         datapath = ev.datapath
         if ev.state == MAIN_DISPATCHER:
             if not datapath.id in self.datapath_list:
-                logging.debug('register datapath: %16x', datapath.id)
+                self.logger.debug('register datapath: %16x', datapath.id)
                 self.datapath_list[datapath.id] = datapath
                 self.mac_to_port[datapath.id] = {}
         elif ev.state == DEAD_DISPATCHER:
             if datapath.id in self.datapath_list:
-                logging.debug('unregister datapath: %16x', datapath.id)
+                self.logger.debug('unregister datapath: %16x', datapath.id)
                 del self.datapath_list[datapath.id]
                 del self.mac_to_port[datapath.id]
 

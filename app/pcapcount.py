@@ -9,13 +9,26 @@ import sys
 import commands
 import logging
 
-logger = logging.getLogger()
-logging.basicConfig(level=logging.DEBUG)
+#logger = logging.getLogger()
+#logging.basicConfig(level=logging.DEBUG)
+
+
 
 
 class sendData(multiprocessing.Process):
     def __init__(self, dict_f, interval, outfilepre, myblock):
         multiprocessing.Process.__init__(self)
+
+        self.logger = logging.getLogger("SimpleSwitchRest")
+        console = logging.StreamHandler()
+        console.setLevel(logging.DEBUG)
+        formatter = logging.Formatter(fmt='[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s',
+                                      datefmt='%Y%m%d %H:%M:%S')
+        console.setFormatter(formatter)
+        self.logger.addHandler(console)
+
+        self.logger.info("")
+
         self.li_flow_count = dict_f
         self.interval = interval
         self.outfilepre = outfilepre
