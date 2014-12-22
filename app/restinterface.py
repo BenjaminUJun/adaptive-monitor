@@ -34,7 +34,7 @@ class SimpleSwitchRest(adaptivemonitor.AdaptiveMonitor):
         console.setLevel(logging.INFO)
         formatter = logging.Formatter("[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s")
         console.setFormatter(formatter)
-        logging.getLogger('').addHandler(console)
+        logging.getLogger('SimpleSwitchRest').addHandler(console)
 
         logging.info("method AdaptiveMonitor.__init__")
         super(SimpleSwitchRest, self).__init__(*args, **kwargs)
