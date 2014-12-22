@@ -188,8 +188,8 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
  #       logging.debug('datapath         port     rx-pkts  rx-bytes rx-error tx-pkts  tx-bytes tx-error')
  #       logging.debug('---------------- -------- -------- -------- -------- -------- -------- --------')
         #        for stat in sorted(body, key=attrgetter('port_no')):
-        for stat in sorted(body, key=lambda l: l.port_no):
-    #        logging.info('%016x %8x %8d %8d %8d %8d %8d %8d', ev.msg.datapath.id, stat.port_no, stat.rx_packets,
+ #       for stat in sorted(body, key=lambda l: l.port_no):
+ #           logging.info('%016x %8x %8d %8d %8d %8d %8d %8d', ev.msg.datapath.id, stat.port_no, stat.rx_packets,
  #               stat.rx_bytes, stat.rx_errors, stat.tx_packets, stat.tx_bytes, stat.tx_errors)
 
     @staticmethod
