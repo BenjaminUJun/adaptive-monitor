@@ -123,8 +123,7 @@ class AdaptiveSwitch(app_manager.RyuApp):
 
     #add flow
     #TODO add timeout params for monitor.
-    @staticmethod
-    def add_flow(datapath, table_id, priority, match, inst):
+    def add_flow(self, datapath, table_id, priority, match, inst):
         parser = datapath.ofproto_parser
         mod = parser.OFPFlowMod(datapath=datapath, table_id=table_id, idle_timeout=0, hard_timeout=0, priority=priority,
                                 flags=ofproto_v1_3.OFPFF_CHECK_OVERLAP, match=match, instructions=inst)
@@ -132,7 +131,6 @@ class AdaptiveSwitch(app_manager.RyuApp):
 
     #delete flow
     #TODO add the table_id and so on? In case of similar entry in different table
-    @staticmethod
     def del_flow(self, datapath, match):
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser

@@ -200,17 +200,15 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
         #           self.logger.info('%016x %8x %8d %8d %8d %8d %8d %8d', ev.msg.datapath.id, stat.port_no, stat.rx_packets,
         #               stat.rx_bytes, stat.rx_errors, stat.tx_packets, stat.tx_bytes, stat.tx_errors)
 
-    @staticmethod
-    def _request_flow_stats(datapath):
+    def _request_flow_stats(self, datapath):
         self.logger.info("method AdaptiveMonitor._request_flow_stats datapath = %16x" % datapath.id)
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
 
-        req = parser.OFPFlowStatsRequest(datapath)
+        req = parser.OFPFlowStatsRequest(datapath, 0, ofproto.OFPP_ANY)
         datapath.send_msg(req)
 
-    @staticmethod
-    def _request_port_stats(datapath):
+    def _request_port_stats(self, datapath):
         self.logger.info("method AdaptiveMonitor._request_port_stats datapath = %16x" % datapath.id)
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
