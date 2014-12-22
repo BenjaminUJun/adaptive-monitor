@@ -37,7 +37,7 @@ class SimpleSwitchRest(adaptivemonitor.AdaptiveMonitor):
         console.setFormatter(formatter)
         logger.addHandler(console)
 
-        logger.info("method AdaptiveMonitor.__init__")
+        logger.info("")
         super(SimpleSwitchRest, self).__init__(*args, **kwargs)
 ###        self.switches = {}
         wsgi = kwargs['wsgi']

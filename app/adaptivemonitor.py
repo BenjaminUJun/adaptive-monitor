@@ -23,12 +23,14 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
 #                            format="[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s",
 #                            datefmt='%Y%m%d %H:%M:%S')
 
+        logger = logging.getLogger("AdaptiveMonitor")
         console = logging.StreamHandler()
         console.setLevel(logging.DEBUG)
         formatter = logging.Formatter("[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s")
         console.setFormatter(formatter)
-        logging.getLogger('').addHandler(console)
-        logging.info("method AdaptiveMonitor.__init__")
+        logger.addHandler(console)
+
+        logger.info("")
         super(AdaptiveMonitor, self).__init__(*args, **kwargs)
         self.datapath_list_monitor = {}
         self.port_list = {}

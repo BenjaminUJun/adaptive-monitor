@@ -22,13 +22,14 @@ class AdaptiveSwitch(app_manager.RyuApp):
 #                            format="[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s",
 #                            datefmt='%Y%m%d %H:%M:%S')
 
+        logger = logging.getLogger("AdaptiveSwitch")
         console = logging.StreamHandler()
         console.setLevel(logging.DEBUG)
         formatter = logging.Formatter("[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s")
         console.setFormatter(formatter)
-        logging.getLogger('').addHandler(console)
+        logger.addHandler(console)
 
-        logging.info("method AdaptiveMonitor.__init__")
+        logger.info("")
         super(AdaptiveSwitch, self).__init__(*args, **kwargs)
         self.datapath_list = {}
         self.mac_to_port = {}
