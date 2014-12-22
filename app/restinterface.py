@@ -29,14 +29,15 @@ class SimpleSwitchRest(adaptivemonitor.AdaptiveMonitor):
         #                            format="[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s",
         #                            datefmt='%Y%m%d %H:%M:%S')
 
-        self.logger = logging.getLogger("app.SimpleSwitchRest")
-        console = logging.StreamHandler()
+#        self.logger = logging.getLogger("app.SimpleSwitchRest")
+        self.logger = logging.getLogger()
+       console = logging.StreamHandler()
         console.setLevel(logging.DEBUG)
         formatter = logging.Formatter(fmt='[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s',
                                       datefmt='%Y%m%d %H:%M:%S')
         console.setFormatter(formatter)
-        hd_filter = logging.Filter('app')
-        console.addFilter(hd_filter)
+#        hd_filter = logging.Filter('app')
+#        console.addFilter(hd_filter)
         self.logger.addHandler(console)
 
         self.logger.info("")
@@ -47,7 +48,7 @@ class SimpleSwitchRest(adaptivemonitor.AdaptiveMonitor):
 
     @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
     def _switch_features_handler(self, ev):
-        self.logger.info("method SimpleSwitchRest.switch_features_handler")
+        self.logger.info("method SimpleSwitchRest._switch_features_handler")
         super(SimpleSwitchRest, self)._switch_features_handler(ev)
 
     def set_mac_to_port(self, datapathid, entry):

@@ -19,14 +19,15 @@ class AdaptiveSwitch(app_manager.RyuApp):
 
     def __init__(self, *args, **kwargs):
 
-        self.logger = logging.getLogger("app.AdaptiveSwitch")
+#        self.logger = logging.getLogger("app.AdaptiveSwitch")
+        self.logger = logging.getLogger()
         console = logging.StreamHandler()
         console.setLevel(logging.DEBUG)
         formatter = logging.Formatter('[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s',
                                       '%Y%m%d %H:%M:%S')
         console.setFormatter(formatter)
-        hd_filter = logging.Filter('app')
-        console.addFilter(hd_filter)
+#        hd_filter = logging.Filter('app')
+#        console.addFilter(hd_filter)
         self.logger.addHandler(console)
 
         self.logger.info("")

@@ -23,14 +23,15 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
         #                            format="[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s",
         #                            datefmt='%Y%m%d %H:%M:%S')
 
-        self.logger = logging.getLogger("app.AdaptiveMonitor")
+#        self.logger = logging.getLogger("app.AdaptiveMonitor")
+        self.logger = logging.getLogger()
         console = logging.StreamHandler()
         console.setLevel(logging.DEBUG)
         formatter = logging.Formatter('[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s',
                                       '%Y%m%d %H:%M:%S')
         console.setFormatter(formatter)
-        hd_filter = logging.Filter('app')
-        console.addFilter(hd_filter)
+#        hd_filter = logging.Filter('app')
+#        console.addFilter(hd_filter)
         self.logger.addHandler(console)
 
         self.logger.info("")
@@ -77,7 +78,6 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
     def _monitor(self):
         self.logger.info("method AdaptiveMonitor._monitor")
         while True:
-            print "in _monitor function"
             for dp in self.datapath_list.values():
                 print dp
                 print dp.id
