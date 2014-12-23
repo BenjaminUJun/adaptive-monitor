@@ -70,7 +70,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
                 del self.port_list[datapath.id]
                 del self.mac_list[datapath.id]
                 del self.ip_list[datapath.id]
-                del self.in_in_list[datapath.id]
+                del self.in_ip_list[datapath.id]
                 del self.out_ip_list[datapath.id]
                 self.in_out_ip_list[datapath.id]
 
@@ -106,16 +106,12 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
             #            print pkt_ipv4.dst
             src = pkt_ipv4.src
             dst = pkt_ipv4.dst
-            print "ipv4 ",
-            print src
-            print "ipv4 ",
-            print dst
-            print "ipv4"
             self.ip_list[datapath.id].append(src)
             self.ip_list[datapath.id].append(dst)
-            #            self.in_ip_list[datapath.id].append(src)
-            #            self.out_ip_list[datapath.id].append(dst)
-            #            self.in_out_ip_list[datapath.id].append((src, dst))
+            self.in_ip_list[datapath.id].append(src)
+            self.out_ip_list[datapath.id].append(dst)
+            self.in_out_ip_list[datapath.id].append((src, dst))
+
             self.add_monitor(datapath, in_ip=src, out_ip=None)
             self.add_monitor(datapath, in_ip=None, out_ip=dst)
             self.add_monitor(datapath, in_ip=src, out_ip=dst)

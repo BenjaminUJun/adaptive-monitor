@@ -41,15 +41,42 @@ class TableDelayTest(app_manager.RyuApp):
         parser = datapath.ofproto_parser
 
         match_empty = parser.OFPMatch()
-#        actions = [parser.OFPActionOutput(self.MIRROR_PORT)]
-        for i in range(0, MTN):
-            inst = [parser.OFPInstructionGotoTable(i + 1)]
-#                    parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)]
-            self.add_flow(datapath, i, 0, match_empty, inst)
+        match_ip1 = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_src='10.9.0.122')
+        match_ip2 = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_src='10.9.0.123')
+        match_ip3 = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_src='10.9.0.124')
+        action1 = [parser.OFPActionOutput(26)]
+        action2 = [parser.OFPActionOutput(27)]
+        action3 = [parser.OFPActionOutput(28)]
+        inst1 = [parser.OFPInstructionGotoTable(1), parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, action1)]
+        inst2 = [parser.OFPInstructionGotoTable(1), parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, action2)]
+        inst3 = [parser.OFPInstructionGotoTable(1), parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, action3)]
+        self.add_flow(datapath, 0, 3, match_ip1, inst1)
+        self.add_flow(datapath, 0, 3, match_ip2, inst2)
+        self.add_flow(datapath, 0, 3, match_ip3, inst3)
 
-        actions = [parser.OFPActionOutput(ofproto.OFPP_CONTROLLER, ofproto.OFPCML_NO_BUFFER)]
-        inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)]
-        self.add_flow(datapath, MTN, 0, match_empty, inst)
+        match_ip1 = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_src='10.9.0.122', ipv4_dst='10.9.0.123')
+        match_ip1 = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_src='10.9.0.123', ipv4_dst='10.9.0.124')
+        match_ip1 = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_src='10.9.0.124', ipv4_dst='10.9.0.122')
+        action1 = [parser.OFPActionOutput(2)]
+        action2 = [parser.OFPActionOutput(3)]
+        action3 = [parser.OFPActionOutput(4)]
+        inst1 = [parser.OFPInstructionGotoTable(2), parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, action1)]
+        inst2 = [parser.OFPInstructionGotoTable(2), parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, action2)]
+        inst3 = [parser.OFPInstructionGotoTable(2), parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, action3)]
+        self.add_flow(datapath, 1, 3, match_ip1, inst1)
+        self.add_flow(datapath, 1, 3, match_ip2, inst2)
+        self.add_flow(datapath, 1, 3, match_ip3, inst3)
+
+
+        #        actions = [parser.OFPActionOutput(self.MIRROR_PORT)]
+#        for i in range(0, MTN):
+#            inst = [parser.OFPInstructionGotoTable(i + 1)]
+            #                    parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)]
+#            self.add_flow(datapath, i, 0, match_empty, inst)
+
+#        actions = [parser.OFPActionOutput(ofproto.OFPP_CONTROLLER, ofproto.OFPCML_NO_BUFFER)]
+#        inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)]
+#        self.add_flow(datapath, MTN, 0, match_empty, inst)
 
     #packet in
     @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
@@ -94,3 +121,30 @@ class TableDelayTest(app_manager.RyuApp):
         mod = parser.OFPFlowMod(datapath=datapath, table_id=table_id, idle_timeout=0, hard_timeout=0, priority=priority,
                                 flags=ofproto_v1_3.OFPFF_CHECK_OVERLAP, match=match, instructions=inst)
         datapath.send_msg(mod)
+
+
+
+
+'''
+        match_empty = parser.OFPMatch()
+        for i in range(0, MTN):
+            match_ip1 = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_src='10.3.0.123', ipv4_dst='10.3.0.124')
+            match_ip2 = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_src='10.3.0.%d' % (i + 1,),
+                                        ipv4_dst='10.3.0.%d' % (i + 111,))
+            actions1 = [parser.OFPActionOutput(i)]
+            actions2 = [parser.OFPActionOutput(i + 1)]
+            inst = [parser.OFPInstructionGotoTable(i + 1)]
+            inst1 = [parser.OFPInstructionGotoTable(i + 1),
+                     parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions1)
+            ]
+            inst2 = [parser.OFPInstructionGotoTable(i + 1),
+                     parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions2)
+            ]
+            self.add_flow(datapath, i, 0, match_empty, inst)
+            self.add_flow(datapath, i, 3, match_ip1, inst1)
+            self.add_flow(datapath, i, 5, match_ip2, inst2)
+
+        actions = [parser.OFPActionOutput(ofproto.OFPP_CONTROLLER, ofproto.OFPCML_NO_BUFFER)]
+        inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)]
+        self.add_flow(datapath, MTN, 0, match_empty, inst)
+'''
