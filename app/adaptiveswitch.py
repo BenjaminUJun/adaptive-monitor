@@ -19,20 +19,18 @@ class AdaptiveSwitch(app_manager.RyuApp):
 
     def __init__(self, *args, **kwargs):
 
-#        self.logger = logging.getLogger("app.AdaptiveSwitch")
         self.logger = logging.getLogger()
+        formatter = logging.Formatter('[%(levelname)s %(asctime)s] IIIS %(name)s.%(funcName)s %(message)s',
+                                      '%Y%m%d %H:%M:%S')
         console = logging.StreamHandler()
         console.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s',
-                                      '%Y%m%d %H:%M:%S')
         console.setFormatter(formatter)
-#        hd_filter = logging.Filter('app')
-#        console.addFilter(hd_filter)
         self.logger.addHandler(console)
 
         self.logger.info("")
         super(AdaptiveSwitch, self).__init__(*args, **kwargs)
         self.datapath_list = {}
+        self.ip_to_mac = {}
         self.mac_to_port = {}
 
     #switch register
@@ -86,17 +84,23 @@ class AdaptiveSwitch(app_manager.RyuApp):
 
         in_port = msg.match['in_port']
         pkt = packet.Packet(msg.data)
-        eth = pkt.get_protocol(ethernet.ethernet)
-        src = eth.src
-        dst = eth.dst
+        pkt_eth = pkt.get_protocol(ethernet.ethernet)
+        if pkt_eth:
+            src_eth = pkt_eth.src
+            dst_eth = pkt_eth.dst
 
-        self.logger.info("packet in %d %s %s %d" % (datapath.id, src, dst, in_port))
-        print "packet in %d %s %s %d" % (datapath.id, src, dst, in_port)
+        pkt_ipv4 = pkt.get_protocol(ipv4.ipv4)
+        if pkt_ipv4:
+            src_ip = pkt_ipv4.src
+            dst_ip = pkt_ipv4.dst
 
-        self.mac_to_port[datapath.id][src] = in_port
+        self.logger.info("packet in %d %s %s %d" % (datapath.id, src_eth, dst_eth, in_port))
+        print "packet in %d %s %s %d" % (datapath.id, src_eth, dst_eth, in_port)
 
-        if dst in self.mac_to_port[datapath.id]:
-            out_port = self.mac_to_port[datapath.id][dst]
+        self.mac_to_port[datapath.id][src_eth] = in_port
+
+        if dst_eth in self.mac_to_port[datapath.id]:
+            out_port = self.mac_to_port[datapath.id][dst_eth]
         else:
             out_port = ofproto.OFPP_FLOOD
 
@@ -104,7 +108,7 @@ class AdaptiveSwitch(app_manager.RyuApp):
         inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)]
 
         if out_port != ofproto.OFPP_FLOOD:
-            match = parser.OFPMatch(in_port=in_port, eth_dst=dst)
+            match = parser.OFPMatch(in_port=in_port, eth_dst=dst_eth)
             print "datapath.id = ",
             print datapath.id
             print "match = ",
