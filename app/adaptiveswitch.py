@@ -94,10 +94,11 @@ class AdaptiveSwitch(app_manager.RyuApp):
             src_ip = pkt_ipv4.src
             dst_ip = pkt_ipv4.dst
 
-        self.logger.info("packet in %d %s %s %d" % (datapath.id, src_eth, dst_eth, in_port))
-        print "packet in %d %s %s %d" % (datapath.id, src_eth, dst_eth, in_port)
+        self.logger.info("packet_eth in %d %s %s %d" % (datapath.id, src_eth, dst_eth, in_port))
+        self.logger.info("packet_ip in %d %s %s %d" % (datapath.id, src_ip, dst_ip, in_port))
 
         self.mac_to_port[datapath.id][src_eth] = in_port
+        self.ip_to_mac[datapath.id][src_ip] = src_eth
 
         if dst_eth in self.mac_to_port[datapath.id]:
             out_port = self.mac_to_port[datapath.id][dst_eth]
@@ -106,6 +107,7 @@ class AdaptiveSwitch(app_manager.RyuApp):
 
         actions = [parser.OFPActionOutput(out_port)]
         inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)]
+#        inst += mirrorport
 
         if out_port != ofproto.OFPP_FLOOD:
             match = parser.OFPMatch(in_port=in_port, eth_dst=dst_eth)

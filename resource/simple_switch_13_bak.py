@@ -76,7 +76,7 @@ class SimpleSwitch13(app_manager.RyuApp):
         self.mac_to_port.setdefault(dpid, {})
         pkt_ipv4 = pkt.get_protocol(ipv4.ipv4)
         if pkt_ipv4:
-        self.logger.info("packet ip in %s %s %s %s", dpid, pkt_ipv4.src, pkt_ipv4.dst, in_port)
+            self.logger.info("packet ip in %s %s %s %s", dpid, pkt_ipv4.src, pkt_ipv4.dst, in_port)
 
         self.logger.info("packet mac in %s %s %s %s", dpid, src, dst, in_port)
 

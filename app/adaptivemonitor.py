@@ -214,32 +214,18 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
         req = parser.OFPPortStatsRequest(datapath, 0, ofproto.OFPP_ANY)
         datapath.send_msg(req)
 
-    def add_monitor(self, datapath, in_ip=None, out_ip=None):
+    def add_monitor(self, datapath, in_ip, out_ip):
+        if self.ip_to_mac[datapath.id][out_ip] in self.mac_to_port:
+            out_port = self.mac_to_port[self.ip_to_mac[datapath.id][out_ip]]
+
         parser = datapath.ofproto_parser
-        if in_ip is not None and out_ip is None:
-            self.in_ip_list[datapath.id].append(in_ip)
-            match_ip = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_src=in_ip)
-            inst = [parser.OFPInstructionGotoTable(1)]
-            self.add_flow(datapath, 0, 3, match_ip, inst)
-            return
-        if in_ip is None and out_ip is not None:
-            self.out_ip_list[datapath.id].append(out_ip)
-            match_ip = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_dst=out_ip)
-            inst = [parser.OFPInstructionGotoTable(2)]
-            #            print "datapath.id = ",
-            #            print datapath.id
-            #            print "match = ",
-            #            print utils.to_string(match_ip)
-            #            print "inst = ",
-            #            print utils.to_string(inst)
-            self.add_flow(datapath, 1, 3, match_ip, inst)
-            return
-        if in_ip is not None and out_ip is not None:
-            self.in_out_ip_list[datapath.id].append((in_ip, out_ip))
-            match_ip = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_src=in_ip, ipv4_dst=out_ip)
-            inst = [parser.OFPInstructionGotoTable(3)]
-            self.add_flow(datapath, 2, 3, match_ip, inst)
-            return
+        ofproto = datapath.ofproto
+        match_ip = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_src=in_ip, ipv4_dst=out_ip)
+
+        actions = [parser.OFPActionOutput(super(AdaptiveMonitor).MIRROR_PORT), parser.OFPActionOutput(out_port)]
+        inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)]
+        self.add_flow(datapath, 0, 3, match_ip, inst)
+
 
     def del_monitor(self, datapath, in_ip=None, out_ip=None):
         parser = datapath.ofproto_parser
