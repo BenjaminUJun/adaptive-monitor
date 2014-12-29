@@ -152,14 +152,11 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
     def _request_flow_stats(datapath):
         logging.log(logging.INFO, "[INFO %s] AdaptiveMonitor._request_flow_stats datapath = %16x" % (
             time.strftime("%Y-%m-%d %H:%M:%S"), datapath.id))
-        print "aaaaaa"
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
-        print "bbbbbbb"
-        req = parser.OFPFlowStatsRequest(datapath, 0, ofproto.OFPP_ANY)
-        print "ccccccc"
+        req = parser.OFPFlowStatsRequest(datapath)
         datapath.send_msg(req)
-        print "ddddddd"
+
 
     @staticmethod
     def _request_port_stats(datapath):
