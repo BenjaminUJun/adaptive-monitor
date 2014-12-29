@@ -5,15 +5,11 @@ import json
 import logging
 import time
 
-from webob import Response, request
-from ryu.controller import ofp_event
-from ryu.controller.handler import CONFIG_DISPATCHER
-from ryu.controller.handler import set_ev_cls
+from webob import Response
 from ryu.app.wsgi import ControllerBase, WSGIApplication, route
 from ryu.lib import dpid as dpid_lib
 
 import adaptivemonitor
-import utils
 
 
 simple_switch_name = 'simple_switch'
