@@ -2,6 +2,7 @@
 # -*- coding:utf-8 -*-
 
 import logging
+import time
 
 from ryu.base import app_manager
 from ryu.controller import ofp_event
@@ -19,15 +20,17 @@ class AdaptiveSwitch(app_manager.RyuApp):
 
     def __init__(self, *args, **kwargs):
 
-        self.logger = logging.getLogger("iiis")
-        console = logging.StreamHandler()
-        console.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s',
-                                      '%Y%m%d %H:%M:%S')
-        console.setFormatter(formatter)
-        self.logger.addHandler(console)
-        self.logger.info("AdaptiveSwitch INIT & LOGGING START")
 
+        #        self.logger = logging.getLogger("iiis")
+        #        console = logging.StreamHandler()
+        #        console.setLevel(logging.DEBUG)
+        #        formatter = logging.Formatter('[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s',
+        #    '%Y%m%d %H:%M:%S')
+        #        console.setFormatter(formatter)
+        #        self.logger.addHandler(console)
+        #        self.logger.info("AdaptiveSwitch INIT & LOGGING START")
+
+        logging.log(logging.INFO, "%s AdaptiveSwitch INIT & LOGGING START" % time.strftime("%Y-%m-%d %H:%M:%S"))
         super(AdaptiveSwitch, self).__init__(*args, **kwargs)
         self.datapath_list = {}
         self.ip_to_mac = {}
@@ -107,7 +110,7 @@ class AdaptiveSwitch(app_manager.RyuApp):
 
         actions = [parser.OFPActionOutput(out_port)]
         inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)]
-#        inst += mirrorport
+        #        inst += mirrorport
 
         if out_port != ofproto.OFPP_FLOOD:
             match = parser.OFPMatch(in_port=in_port, eth_dst=dst_eth)
