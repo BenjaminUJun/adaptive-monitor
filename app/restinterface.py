@@ -33,7 +33,7 @@ class SimpleSwitchRest(adaptivemonitor.AdaptiveMonitor):
         console.setFormatter(formatter)
         self.logger.addHandler(console)
 
-        self.logger.info("INIT & LOGGING START")
+        self.logger.info("SimpleSwitchRest INIT & LOGGING START")
 
         super(SimpleSwitchRest, self).__init__(*args, **kwargs)
         ###        self.switches = {}

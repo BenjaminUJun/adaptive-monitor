@@ -26,7 +26,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
                                       '%Y%m%d %H:%M:%S')
         console.setFormatter(formatter)
         self.logger.addHandler(console)
-        self.logger.info("INIT & LOGGING START")
+        self.logger.info("AdaptiveMonitor INIT & LOGGING START")
         super(AdaptiveMonitor, self).__init__(*args, **kwargs)
         self.datapath_list_monitor = {}
         self.port_list = {}

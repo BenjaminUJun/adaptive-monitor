@@ -26,7 +26,7 @@ class AdaptiveSwitch(app_manager.RyuApp):
                                       '%Y%m%d %H:%M:%S')
         console.setFormatter(formatter)
         self.logger.addHandler(console)
-        self.logger.info("INIT & LOGGING START")
+        self.logger.info("AdaptiveSwitch INIT & LOGGING START")
 
         super(AdaptiveSwitch, self).__init__(*args, **kwargs)
         self.datapath_list = {}
