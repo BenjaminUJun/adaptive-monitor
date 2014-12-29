@@ -9,11 +9,6 @@ import sys
 import commands
 import logging
 
-#logger = logging.getLogger()
-#logging.basicConfig(level=logging.DEBUG)
-
-
-
 
 class sendData(multiprocessing.Process):
     def __init__(self, dict_f, interval, outfilepre, myblock):

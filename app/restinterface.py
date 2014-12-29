@@ -3,6 +3,7 @@
 
 import json
 import logging
+import time
 
 from webob import Response, request
 from ryu.controller import ofp_event
@@ -25,16 +26,8 @@ class SimpleSwitchRest(adaptivemonitor.AdaptiveMonitor):
     _CONTEXTS = {'wsgi': WSGIApplication}
 
     def __init__(self, *args, **kwargs):
-        self.logger = logging.getLogger("iiis")
-        console = logging.StreamHandler()
-        console.setLevel(logging.INFO)
-        formatter = logging.Formatter(fmt='[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s',
-                                      datefmt='%Y%m%d %H:%M:%S')
-        console.setFormatter(formatter)
-        self.logger.addHandler(console)
 
-        self.logger.info("SimpleSwitchRest INIT & LOGGING START")
-
+        logging.log(logging.INFO, "%s SimpleSwitchRest INIT & LOGGING START" % time.strftime("%Y-%m-%d %H:%M:%S"))
         super(SimpleSwitchRest, self).__init__(*args, **kwargs)
         ###        self.switches = {}
         wsgi = kwargs['wsgi']

@@ -5,6 +5,7 @@
 from operator import attrgetter
 import logging
 import threading
+import time
 
 from ryu.controller import ofp_event
 from ryu.controller.handler import MAIN_DISPATCHER, DEAD_DISPATCHER
@@ -19,14 +20,8 @@ import utils
 
 class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
     def __init__(self, *args, **kwargs):
-        self.logger = logging.getLogger("iiis")
-        console = logging.StreamHandler()
-        console.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s',
-                                      '%Y%m%d %H:%M:%S')
-        console.setFormatter(formatter)
-        self.logger.addHandler(console)
-        self.logger.info("AdaptiveMonitor INIT & LOGGING START")
+        logging.log(logging.INFO, "%s AdaptiveMonitor INIT & LOGGING START" % time.strftime("%Y-%m-%d %H:%M:%S"))
+
         super(AdaptiveMonitor, self).__init__(*args, **kwargs)
         self.datapath_list_monitor = {}
         self.port_list = {}
