@@ -86,7 +86,7 @@ class SimpleSwitch13(app_manager.RyuApp):
         dpid = datapath.id
         self.mac_to_port.setdefault(dpid, {})
 
-        logger.debug("packet in %s %s %s %s", dpid, src, dst, in_port)
+        self.logger.info("packet in %s %s %s %s", dpid, src, dst, in_port)
 
         # learn a mac address to avoid FLOOD next time.
         self.mac_to_port[dpid][src] = in_port
@@ -116,7 +116,7 @@ class SimpleSwitch13(app_manager.RyuApp):
         dp = ev.dp
         dpid_str = dpid_lib.dpid_to_str(dp.id)
         msg = 'Receive topology change event. Flush MAC table.'
-        logging.log("[dpid=%s] %s", dpid_str, msg)
+        self.logger.debug("[dpid=%s] %s", dpid_str, msg)
 
         if dp.id in self.mac_to_port:
             self.delete_flow(dp)
@@ -130,5 +130,5 @@ class SimpleSwitch13(app_manager.RyuApp):
                     stplib.PORT_STATE_LISTEN: 'LISTEN',
                     stplib.PORT_STATE_LEARN: 'LEARN',
                     stplib.PORT_STATE_FORWARD: 'FORWARD'}
-        logging.log("[dpid=%s][port=%d] state=%s",
+        self.logger.debug("[dpid=%s][port=%d] state=%s",
                           dpid_str, ev.port_no, of_state[ev.port_state])

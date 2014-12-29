@@ -66,7 +66,7 @@ class SimpleSwitch(app_manager.RyuApp):
         dpid = datapath.id
         self.mac_to_port.setdefault(dpid, {})
 
-        logging.log("packet in %s %s %s %s", dpid, src, dst, msg.in_port)
+        self.logger.debug("packet in %s %s %s %s", dpid, src, dst, msg.in_port)
 
         # learn a mac address to avoid FLOOD next time.
         self.mac_to_port[dpid][src] = msg.in_port
@@ -80,6 +80,10 @@ class SimpleSwitch(app_manager.RyuApp):
 
         # install a flow to avoid packet_in next time
         if out_port != ofproto.OFPP_FLOOD:
+            print datapath
+            print msg.in_port
+            print dst
+            print actions
             self.add_flow(datapath, msg.in_port, dst, actions)
 
         out = datapath.ofproto_parser.OFPPacketOut(
@@ -95,10 +99,10 @@ class SimpleSwitch(app_manager.RyuApp):
 
         ofproto = msg.datapath.ofproto
         if reason == ofproto.OFPPR_ADD:
-            logging.log("port added %s", port_no)
+            self.logger.debug("port added %s", port_no)
         elif reason == ofproto.OFPPR_DELETE:
-            logging.log("port deleted %s", port_no)
+            self.logger.debug("port deleted %s", port_no)
         elif reason == ofproto.OFPPR_MODIFY:
-            logging.log("port modified %s", port_no)
+            self.logger.debug("port modified %s", port_no)
         else:
-            logging.log("Illeagal port state %s %s", port_no, reason)
+            self.logger.debug("Illeagal port state %s %s", port_no, reason)

@@ -13,8 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
-
 from ryu.base import app_manager
 from ryu.controller import ofp_event
 from ryu.controller.handler import CONFIG_DISPATCHER, MAIN_DISPATCHER
@@ -78,9 +76,9 @@ class SimpleSwitch13(app_manager.RyuApp):
         self.mac_to_port.setdefault(dpid, {})
         pkt_ipv4 = pkt.get_protocol(ipv4.ipv4)
         if pkt_ipv4:
-            logging.log("packet ip in %s %s %s %s", dpid, pkt_ipv4.src, pkt_ipv4.dst, in_port)
+            self.logger.info("packet ip in %s %s %s %s", dpid, pkt_ipv4.src, pkt_ipv4.dst, in_port)
 
-        logging.log("packet mac in %s %s %s %s", dpid, src, dst, in_port)
+        self.logger.info("packet mac in %s %s %s %s", dpid, src, dst, in_port)
 
         # learn a mac address to avoid FLOOD next time.
         self.mac_to_port[dpid][src] = in_port
