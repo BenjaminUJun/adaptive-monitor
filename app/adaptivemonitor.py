@@ -125,7 +125,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
         filter_flow_table = [flow for flow in flows if "in_port" in flow.match and "eth_dst" in flow.match]
         sorted_flow_table = sorted(filter_flow_table, key=lambda f: f.byte_count)
         for stat in sorted_flow_table:
-            logging.log(logging.DEBUG, "[INFO %s]%016x %8x %17s %8x %8d %8d", (
+            logging.log(logging.DEBUG, "[INFO %s] %16x %8x %17s %8x %8d %8d", (
                 time.strftime("%Y-%m-%d %H:%M:%S"), ev.msg.datapath.id, stat.match['in_port'], stat.match['eth_dst'],
                 stat.instructions[0].actions[0].port, stat.packet_count, stat.byte_count))
 
@@ -144,7 +144,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
                         "%Y-%m-%d %H:%M:%S"))
         sorted_port_table = sorted(ports, key=lambda l: l.port_no)
         for stat in sorted_port_table:
-            logging.log(logging.DEBUG, '%016x %8x %8d %8d %8d %8d %8d %8d' % (
+            logging.log(logging.DEBUG, '[INFO %s] %16x %8x %8d %8d %8d %8d %8d %8d' % (
                 time.strftime("%Y-%m-%d %H:%M:%S"), ev.msg.datapath.id, stat.port_no, stat.rx_packets, stat.rx_bytes,
                 stat.rx_errors, stat.tx_packets, stat.tx_bytes, stat.tx_errors))
 
