@@ -120,18 +120,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
     def _flow_stats_reply_handler(self, ev):
         logging.log(logging.INFO,
                     "[INFO %s] AdaptiveMonitor._flow_stats_reply_handler" % time.strftime("%Y-%m-%d %H:%M:%S"))
-        flows = []
-        flows.extend(ev.msg.body)
-        #        for stat in ev.msg.body:
-        #            flows.append('table_id=%s '
-        #                         'duration_sec=%d duration_nsec=%d '
-        #                         'priority=%d '
-        #                         'idle_timeout=%d hard_timeout=%d flags=0x%04x '
-        #                         'cookie=%d packet_count=%d byte_count=%d '
-        #                         'match=%s instructions=%s' %
-        #                         (stat.table_id, stat.duration_sec, stat.duration_nsec, stat.priority, stat.idle_timeout,
-        #                          stat.hard_timeout, stat.flags, stat.cookie, stat.packet_count, stat.byte_count, stat.match,
-        #                          stat.instructions))
+        flows = ev.msg.body
         logging.log(logging.DEBUG, 'datapath         in-port  eth-dst           out-port packets  bytes   ')
         logging.log(logging.DEBUG, '---------------- -------- ----------------- -------- -------- --------')
         filter_flow_table = [flow for flow in flows if "in_port" in flow.match and "eth_dst" in flow.match]
@@ -146,27 +135,15 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
     def _port_stats_reply_handler(self, ev):
         logging.log(logging.INFO,
                     "[INFO %s] AdaptiveMonitor._port_stats_reply_handler" % time.strftime("%Y-%m-%d %H:%M:%S"))
-        ports = []
-        ports.extend(ev.msg.body)
-        #        for stat in ev.msg.body:
-        #            ports.append('port_no=%d '
-        #                         'rx_packets=%d tx_packets=%d '
-        #                         'rx_bytes=%d tx_bytes=%d '
-        #                         'rx_dropped=%d tx_dropped=%d '
-        #                         'rx_errors=%d tx_errors=%d '
-        #                         'rx_frame_err=%d rx_over_err=%d rx_crc_err=%d '
-        #                         'collisions=%d duration_sec=%d duration_nsec=%d' %
-        #                         (stat.port_no, stat.rx_packets, stat.tx_packets, stat.rx_bytes, stat.tx_bytes, stat.rx_dropped,
-        #                          stat.tx_dropped, stat.rx_errors, stat.tx_errors, stat.rx_frame_err, stat.rx_over_err,
-        #                          stat.rx_crc_err, stat.collisions, stat.duration_sec, stat.duration_nsec))
+        ports = ev.msg.body
+
         logging.log(logging.DEBUG,
                     '[DEBUG %s] datapath         port     rx-pkts  rx-bytes rx-error tx-pkts  tx-bytes tx-error' % time.strftime(
                         "%Y-%m-%d %H:%M:%S"))
         logging.log(logging.DEBUG,
                     '[DEBUG %s]---------------- -------- -------- -------- -------- -------- -------- --------' % time.strftime(
                         "%Y-%m-%d %H:%M:%S"))
-        filter_port_table = filter([port for port in ports], port.hasattr('inport') and port.hasattr("eth_dst"))
-        sorted_port_table = sorted(filter_port_table, key=lambda l: l.port_no)
+        sorted_port_table = sorted(ports, key=lambda l: l.port_no)
         for stat in sorted_port_table:
             logging.log(logging.DEBUG, '%016x %8x %8d %8d %8d %8d %8d %8d' % (
                 time.strftime("%Y-%m-%d %H:%M:%S"), ev.msg.datapath.id, stat.port_no, stat.rx_packets, stat.rx_bytes,
