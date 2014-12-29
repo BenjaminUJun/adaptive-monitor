@@ -20,15 +20,13 @@ import utils
 class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
     def __init__(self, *args, **kwargs):
         self.logger = logging.getLogger()
-        '''
         console = logging.StreamHandler()
         console.setLevel(logging.DEBUG)
         formatter = logging.Formatter('[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s',
                                       '%Y%m%d %H:%M:%S')
         console.setFormatter(formatter)
         self.logger.addHandler(console)
-        '''
-        self.logger.info("")
+        self.logger.info("INIT & LOGGING START")
         super(AdaptiveMonitor, self).__init__(*args, **kwargs)
         self.datapath_list_monitor = {}
         self.port_list = {}

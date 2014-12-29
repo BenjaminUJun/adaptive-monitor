@@ -16,7 +16,7 @@ import utils
 
 
 simple_switch_instance_name = 'simple_switch_api_app'
-url = '/simpleswitch/mactable/{dpid}'
+url1 = '/simpleswitch/mactable/{dpid}'
 url2 = '/simpleswitch/statinfo/{dpid}'
 SWITCH_ID_PATTERN = dpid_lib.DPID_PATTERN + r'|all'
 
@@ -32,13 +32,13 @@ class SimpleSwitchRest(adaptivemonitor.AdaptiveMonitor):
 #        self.logger = logging.getLogger("app.SimpleSwitchRest")
         self.logger = logging.getLogger()
         console = logging.StreamHandler()
-        console.setLevel(logging.DEBUG)
+        console.setLevel(logging.INFO)
         formatter = logging.Formatter(fmt='[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s',
                                       datefmt='%Y%m%d %H:%M:%S')
         console.setFormatter(formatter)
         self.logger.addHandler(console)
 
-        self.logger.info("")
+        self.logger.info("INIT & LOGGING START")
 
         super(SimpleSwitchRest, self).__init__(*args, **kwargs)
         ###        self.switches = {}
@@ -95,7 +95,7 @@ class SimpleSwitchController(ControllerBase):
 #        print int('5e3e089e01a7de53', 16) in self.simple_switch_spp.mac_to_port
 
 
-    @route('simpleswitch', url, methods=['GET'], requirements={'datapathid': SWITCH_ID_PATTERN})
+    @route('simpleswitch', url1, methods=['GET'], requirements={'datapathid': SWITCH_ID_PATTERN})
     def _list_mac_table(self, req, **kwargs):
         self.logger.info("method SimpleSwitchController._list_mac_table")
         simple_switch = self.simple_switch_spp
@@ -114,7 +114,7 @@ class SimpleSwitchController(ControllerBase):
 #        print "\n"
         return Response(content_type='application/json', body=body)
 
-    @route('simpleswitch', url, methods=['PUT'], requirements={'dpid': SWITCH_ID_PATTERN})
+    @route('simpleswitch', url1, methods=['PUT'], requirements={'dpid': SWITCH_ID_PATTERN})
     def _put_mac_table(self, req, **kwargs):
         self.logger.info("method SimpleSwitchController._put_mac_table")
         simple_switch = self.simple_switch_spp
