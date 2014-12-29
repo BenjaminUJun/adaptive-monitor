@@ -8,7 +8,7 @@ from ryu.controller import ofp_event
 from ryu.controller.handler import MAIN_DISPATCHER, DEAD_DISPATCHER
 from ryu.controller.handler import set_ev_cls
 from ryu.lib import hub
-from ryu.ofproto import ofproto_v1_3, ofproto_v1_3_parser, ether
+from ryu.ofproto import ether
 from ryu.lib.packet import packet, ethernet, ipv4
 
 import adaptiveswitch
@@ -172,7 +172,8 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
                 time.strftime("%Y-%m-%d %H:%M:%S"), ev.msg.datapath.id, stat.port_no, stat.rx_packets, stat.rx_bytes,
                 stat.rx_errors, stat.tx_packets, stat.tx_bytes, stat.tx_errors))
 
-    def _request_flow_stats(self, datapath):
+    @staticmethod
+    def _request_flow_stats(datapath):
         logging.log(logging.INFO, "[INFO %s] AdaptiveMonitor._request_flow_stats datapath = %16x" % (
             time.strftime("%Y-%m-%d %H:%M:%S"), datapath.id))
         ofproto = datapath.ofproto
@@ -198,10 +199,9 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
         ofproto = datapath.ofproto
         match_ip = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_src=in_ip, ipv4_dst=out_ip)
 
-        actions = [parser.OFPActionOutput(super(AdaptiveMonitor).MIRROR_PORT), parser.OFPActionOutput(out_port)]
+        actions = [parser.OFPActionOutput(self.MIRROR_PORT), parser.OFPActionOutput(out_port)]
         inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)]
         self.add_flow(datapath, 0, 3, match_ip, inst)
-
 
     def del_monitor(self, datapath, in_ip, out_ip):
         parser = datapath.ofproto_parser

@@ -7,9 +7,8 @@ import time
 from ryu.base import app_manager
 from ryu.controller import ofp_event
 from ryu.controller.handler import set_ev_cls, CONFIG_DISPATCHER, MAIN_DISPATCHER, DEAD_DISPATCHER
-from ryu.ofproto import ofproto_v1_3, ofproto_v1_3_parser, ether
-from ryu.lib import ofctl_v1_3
-from ryu.lib.packet import packet, ethernet, ipv4
+from ryu.ofproto import ofproto_v1_3
+from ryu.lib.packet import packet, ethernet
 
 
 class AdaptiveSwitch(app_manager.RyuApp):
@@ -105,7 +104,6 @@ class AdaptiveSwitch(app_manager.RyuApp):
         datapath.send_msg(out)
 
     #add flow
-    #TODO add timeout params for monitor.
     @staticmethod
     def add_flow(datapath, priority, match, inst):
         parser = datapath.ofproto_parser

@@ -16,7 +16,7 @@ import adaptivemonitor
 import utils
 
 
-simple_switch_instance_name = 'simple_switch_api_app'
+simple_switch_name = 'simple_switch'
 url1 = '/simpleswitch/mactable/{dpid}'
 url2 = '/simpleswitch/statinfo/{dpid}'
 SWITCH_ID_PATTERN = dpid_lib.DPID_PATTERN + r'|all'
@@ -27,124 +27,80 @@ class SimpleSwitchRest(adaptivemonitor.AdaptiveMonitor):
 
     def __init__(self, *args, **kwargs):
 
-        logging.log(logging.INFO, "[INFO %s] SimpleSwitchRest INIT & LOGGING START" % time.strftime("%Y-%m-%d %H:%M:%S"))
+        logging.log(logging.INFO,
+                    "[INFO %s] SimpleSwitchRest__init__" % time.strftime("%Y-%m-%d %H:%M:%S"))
         super(SimpleSwitchRest, self).__init__(*args, **kwargs)
-        ###        self.switches = {}
         wsgi = kwargs['wsgi']
-        wsgi.register(SimpleSwitchController, {simple_switch_instance_name: self})
+        wsgi.register(SimpleSwitchController, {simple_switch_name: self})
 
-#    @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
-#    def _switch_features_handler(self, ev):
-#        logging.log("method SimpleSwitchRest._switch_features_handler")
-#        super(SimpleSwitchRest, self)._switch_features_handler(ev)
-
-    def set_mac_to_port(self, datapathid, entry):
-        logging.log("method SimpleSwitchRest.set_mac_to_port")
-        mac_table = self.mac_to_port.setdefault(datapathid, {})
-        datapath = self.datapath_list[datapathid]
+    def set_mac_to_port(self, datapath_id, entry):
+        logging.log(logging.INFO, "[INFO %s] SimpleSwitchRest.set_mac_to_port" % time.strftime("%Y-%m-%d %H:%M:%S"))
+        mac_to_port_f = self.mac_to_port.setdefault(datapath_id, {})
+        datapath = self.datapath_list[datapath_id]
+        if datapath is None:
+            return
         ofproto = datapath.ofproto
 
-        print "datapathid=", datapathid
-        print "datapath=", datapath
-
-        entry_port = entry['port']
         entry_mac = entry['mac']
+        entry_port = entry['port']
 
-        print entry_port
-        print entry_mac
+        parser = datapath.ofproto_parser
+        if not entry_port in mac_to_port_f.values():
+            for mac, port in mac_to_port_f.items():
+                actions = [parser.OFPActionOutput(entry_port)]
+                inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)]
+                match = parser.OFPMatch(in_port=port, eth_dst=entry_mac)
+                self.add_flow(datapath, 2, match, inst)
 
-        if datapath is not None:
-            parser = datapath.ofproto_parser
-            if not entry_port in mac_table.values():
-                for mac, port in mac_table.items():
-                    # from known device to new device
-                    actions = [parser.OFPActionOutput(entry_port)]
-                    inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)]
-                    match = parser.OFPMatch(in_port=port, eth_dst=entry_mac)
-                    self.add_flow(datapath, 2, 2, match, inst)
-                    # from new device to known device
-                    actions = [parser.OFPActionOutput(port)]
-                    inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)]
-                    match = parser.OFPMatch(in_port=entry_port, eth_dst=mac)
-                    self.add_flow(datapath, 2, 2, match, inst)
-                mac_table.update({entry_mac: entry_port})
-        print mac_table
-        return mac_table
+                actions = [parser.OFPActionOutput(port)]
+                inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)]
+                match = parser.OFPMatch(in_port=entry_port, eth_dst=mac)
+                self.add_flow(datapath, 2, match, inst)
+            mac_to_port_f.update({entry_mac: entry_port})
+        return mac_to_port_f
 
 
 class SimpleSwitchController(ControllerBase):
     def __init__(self, req, link, data, **config):
-        logging.log("method SimpleSwitchController.__init__")
+        logging.log(logging.INFO, "[INFO %s] SimpleSwitchController.__init__" % time.strftime("%Y-%m-%d %H:%M:%S"))
         super(SimpleSwitchController, self).__init__(req, link, data, **config)
-        self.simple_switch_spp = data[simple_switch_instance_name]
-#        print "ssc_init\n"
-#        print self.simple_switch_spp.mac_to_port
-#        print 6790874762851226928 in self.simple_switch_spp.mac_to_port
-#        print int('5e3e089e01a7de53', 16) in self.simple_switch_spp.mac_to_port
+        self.simple_switch_spp = data[simple_switch_name]
 
 
     @route('simpleswitch', url1, methods=['GET'], requirements={'datapathid': SWITCH_ID_PATTERN})
     def _list_mac_table(self, req, **kwargs):
-        logging.log("method SimpleSwitchController._list_mac_table")
+        logging.log(logging.INFO,
+                    "[INFO %s] SimpleSwitchController._list_mac_table" % time.strftime("%Y-%m-%d %H:%M:%S"))
         simple_switch = self.simple_switch_spp
-        datapathid = dpid_lib.str_to_dpid(kwargs['dpid'])
-        #        print "list"
-        #        print simple_switch
-        #        print "list_mac_table"
-        #        print "\n"
-        if datapathid not in simple_switch.mac_to_port:
+        datapath_id = dpid_lib.str_to_dpid(kwargs['dpid'])
+        if datapath_id not in simple_switch.mac_to_port:
             return Response(status=404)
 
-        mac_table = simple_switch.mac_to_port.get(datapathid, {})
-#        print "list_mac_table"
-#        print "\n"
+        mac_table = simple_switch.mac_to_port.get(datapath_id, {})
         body = json.dumps(mac_table)
-#        print "\n"
         return Response(content_type='application/json', body=body)
 
     @route('simpleswitch', url1, methods=['PUT'], requirements={'dpid': SWITCH_ID_PATTERN})
     def _put_mac_table(self, req, **kwargs):
-        logging.log("method SimpleSwitchController._put_mac_table")
+        logging.log(logging.INFO,
+                    "[INFO %s] SimpleSwitchController._put_mac_table" % time.strftime("%Y-%m-%d %H:%M:%S"))
         simple_switch = self.simple_switch_spp
-        datapathid = dpid_lib.str_to_dpid(kwargs['dpid'])
-        #        print "\ndpid = "
-        #        print datapathid
-        #        print "\n"
+        datapath_id = dpid_lib.str_to_dpid(kwargs['dpid'])
         new_entry = eval(req.body)
-        #        print "new_entry=", new_entry
-        #        print "put"
-        #        print simple_switch.mac_to_port
 
-        #        print "list_mac_table"
-        #        print simple_switch.mac_to_port[datapathid]
-        #        print "\n"
-
-        if not datapathid in simple_switch.mac_to_port:
-#            print "404"
+        if not datapath_id in simple_switch.mac_to_port:
             return Response(status=404)
 
-        #        try:
-        if True:
-#            print "dpid %16x" % (datapathid,)
-#            print new_entry
-            mac_table = simple_switch.set_mac_to_port(datapathid, new_entry)
-#            print "put_mac_table"
-#            print mac_table
-#            print "\n"
-            body = json.dumps(mac_table)
-#            print body
-#            print "\n"
-            return Response(content_type='application/json', body=body)
-        #        except Exception as e:
-        #            print "exception"
-        #            print e
-        #            raise e
-        #            return Response(status=500)
+        mac_table = simple_switch.set_mac_to_port(datapath_id, new_entry)
+        body = json.dumps(mac_table)
+        return Response(content_type='application/json', body=body)
 
     @route('simpleswitch', url2, methods=['PUT'], requirements={'dpid': SWITCH_ID_PATTERN})
     def _put_stat_info(self, req, **kwargs):
-        logging.log("method SimpleSwitchController._put_stat_info")
+        logging.log(logging.INFO,
+                    "[INFO %s] SimpleSwitchController._put_stat_info" % time.strftime("%Y-%m-%d %H:%M:%S"))
         new_entry = eval(req.body)
-#        print new_entry
-        simple_switch = self.simple_switch_spp
-        datapathid = dpid_lib.str_to_dpid(kwargs['dpid'])
+        logging.log(logging.INFO, "[INFO %s] SimpleSwitchController._put_stat_info %s" % (time.strftime("%Y-%m-%d %H:%M:%S"), str(new_entry)))
+
+        datapath_id = dpid_lib.str_to_dpid(kwargs['dpid'])
+        flow_count = eval(kwargs['count'])
