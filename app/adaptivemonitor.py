@@ -35,7 +35,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
     #switch register
     @set_ev_cls(ofp_event.EventOFPStateChange, [MAIN_DISPATCHER, DEAD_DISPATCHER])
     def _state_change_handler(self, ev):
-        logging.log(logging.INFO, "[INFO %s] AdaptiveMonitor._state_change_handler Datapath $d" % (
+        logging.log(logging.INFO, "[INFO %s] AdaptiveMonitor._state_change_handler Datapath %x" % (
             time.strftime("%Y-%m-%d %H:%M:%S"), ev.datapath.id))
         super(AdaptiveMonitor, self)._state_change_handler(ev)
         datapath = ev.datapath
@@ -43,7 +43,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
         if ev.state == MAIN_DISPATCHER:
             if not datapath.id in self.datapath_list_monitor:
                 logging.log(logging.INFO,
-                            "[INFO %s] AdaptiveMonitor._state_change_handler Register Datapath %16d" % (
+                            "[INFO %s] AdaptiveMonitor._state_change_handler Register Datapath %x" % (
                                 time.strftime("%Y-%m-%d %H:%M:%S"), datapath.id))
                 self.datapath_list_monitor[datapath.id] = datapath
                 self.port_list[datapath.id] = []
@@ -56,7 +56,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
         elif ev.state == DEAD_DISPATCHER:
             if datapath.id in self.datapath_list_monitor:
                 logging.log(logging.INFO,
-                            "[INFO %s] AdaptiveMonitor._state_change_handler Unregister Datapath %16d" % (
+                            "[INFO %s] AdaptiveMonitor._state_change_handler Unregister Datapath %x" % (
                                 time.strftime("%Y-%m-%d %H:%M:%S"), datapath.id))
                 del self.datapath_list_monitor[datapath.id]
                 del self.port_list[datapath.id]
@@ -132,7 +132,6 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
         #                         (stat.table_id, stat.duration_sec, stat.duration_nsec, stat.priority, stat.idle_timeout,
         #                          stat.hard_timeout, stat.flags, stat.cookie, stat.packet_count, stat.byte_count, stat.match,
         #                          stat.instructions))
-        #        self.logger.debug('FlowStats: %s', flows)
         logging.log(logging.DEBUG, 'datapath         in-port  eth-dst           out-port packets  bytes   ')
         logging.log(logging.DEBUG, '---------------- -------- ----------------- -------- -------- --------')
         filter_flow_table = [flow for flow in flows if "in_port" in flow.match and "eth_dst" in flow.match]
@@ -211,6 +210,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
             match_ip = parser.OFPMatch(eth_type=ether.ETH_TYPE_IP, ipv4_src=in_ip, ipv4_dst=out_ip)
             self.del_flow(datapath, match_ip)
         except ValueError as ex:
-            self.logger.exception(
-                "del_flow for (ip_in = %s, out_ip = %s) on %16xd failed" % (in_ip, out_ip, datapath.id))
+            logging.log(logging.WARNING,
+                        "[WARNING, %s] AdaptiveMonitordel_monitor for ip_in = %s, out_ip = %s on %16x failed" % (
+                            time.strftime("%Y-%m-%d %H:%M:%S"), in_ip, out_ip, datapath.id))
         return

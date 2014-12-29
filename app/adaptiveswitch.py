@@ -25,13 +25,13 @@ class AdaptiveSwitch(app_manager.RyuApp):
     #switch register
     @set_ev_cls(ofp_event.EventOFPStateChange, [MAIN_DISPATCHER, DEAD_DISPATCHER])
     def _state_change_handler(self, ev):
-        logging.log(logging.INFO, "[INFO %s] AdaptiveSwitch._state_change_handler Datapath %16d" % (
+        logging.log(logging.INFO, "[INFO %s] AdaptiveSwitch._state_change_handler Datapath %x" % (
             time.strftime("%Y-%m-%d %H:%M:%S"), ev.datapath.id))
         datapath = ev.datapath
         if ev.state == MAIN_DISPATCHER:
             if not datapath.id in self.datapath_list:
                 logging.log(logging.INFO,
-                            "[INFO %s] AdaptiveSwitch._state_change_handler Register Datapath %16d" % (
+                            "[INFO %s] AdaptiveSwitch._state_change_handler Register Datapath %x" % (
                                 time.strftime("%Y-%m-%d %H:%M:%S"), datapath.id))
                 self.datapath_list[datapath.id] = datapath
                 self.mac_to_port[datapath.id] = {}
@@ -62,7 +62,7 @@ class AdaptiveSwitch(app_manager.RyuApp):
     @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
     def _packet_in_handler(self, ev):
         logging.log(logging.INFO,
-                    "[INFO %s] AdaptiveSwitch._packet_in_handler Datapath %16d" % (
+                    "[INFO %s] AdaptiveSwitch._packet_in_handler Datapath %x" % (
                         time.strftime("%Y-%m-%d %H:%M:%S"), ev.msg.datapath.id))
         msg = ev.msg
         datapath = msg.datapath
