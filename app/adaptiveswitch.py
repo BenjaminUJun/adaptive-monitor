@@ -20,14 +20,16 @@ class AdaptiveSwitch(app_manager.RyuApp):
     def __init__(self, *args, **kwargs):
 
         self.logger = logging.getLogger()
-        formatter = logging.Formatter('[%(levelname)s %(asctime)s] IIIS %(name)s.%(funcName)s %(message)s',
-                                      '%Y%m%d %H:%M:%S')
+        '''
         console = logging.StreamHandler()
         console.setLevel(logging.DEBUG)
+        formatter = logging.Formatter('[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s',
+                                      '%Y%m%d %H:%M:%S')
         console.setFormatter(formatter)
         self.logger.addHandler(console)
-
+        '''
         self.logger.info("")
+
         super(AdaptiveSwitch, self).__init__(*args, **kwargs)
         self.datapath_list = {}
         self.ip_to_mac = {}

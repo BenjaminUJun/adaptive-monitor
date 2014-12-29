@@ -36,20 +36,19 @@ class SimpleSwitchRest(adaptivemonitor.AdaptiveMonitor):
         formatter = logging.Formatter(fmt='[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s',
                                       datefmt='%Y%m%d %H:%M:%S')
         console.setFormatter(formatter)
-#        hd_filter = logging.Filter('app')
-#        console.addFilter(hd_filter)
         self.logger.addHandler(console)
 
         self.logger.info("")
+
         super(SimpleSwitchRest, self).__init__(*args, **kwargs)
         ###        self.switches = {}
         wsgi = kwargs['wsgi']
         wsgi.register(SimpleSwitchController, {simple_switch_instance_name: self})
 
-    @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
-    def _switch_features_handler(self, ev):
-        self.logger.info("method SimpleSwitchRest._switch_features_handler")
-        super(SimpleSwitchRest, self)._switch_features_handler(ev)
+#    @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
+#    def _switch_features_handler(self, ev):
+#        self.logger.info("method SimpleSwitchRest._switch_features_handler")
+#        super(SimpleSwitchRest, self)._switch_features_handler(ev)
 
     def set_mac_to_port(self, datapathid, entry):
         self.logger.info("method SimpleSwitchRest.set_mac_to_port")
