@@ -16,7 +16,7 @@ import adaptiveswitch
 
 class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
     def __init__(self, *args, **kwargs):
-        logging.log(logging.INFO, "[INFO %s] AdaptiveMonitor INIT & LOGGING START" % time.strftime("%Y-%m-%d %H:%M:%S"))
+        logging.log(logging.INFO, "[INFO %s] AdaptiveMonitor__init__" % time.strftime("%Y-%m-%d %H:%M:%S"))
 
         super(AdaptiveMonitor, self).__init__(*args, **kwargs)
         self.datapath_list_monitor = {}

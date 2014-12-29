@@ -46,7 +46,8 @@ class AdaptiveSwitch(app_manager.RyuApp):
     @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
     def _switch_features_handler(self, ev):
         logging.log(logging.INFO,
-                    "[INFO %s] AdaptiveSwitch._switch_features_handler Datapath %16d" % ev.msg.datapath.id)
+                    "[INFO %s] AdaptiveSwitch._switch_features_handler Datapath %16d" % (
+                        time.strftime("%Y-%m-%d %H:%M:%S"), ev.msg.datapath.id))
         datapath = ev.msg.datapath
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
@@ -56,6 +57,7 @@ class AdaptiveSwitch(app_manager.RyuApp):
                   parser.OFPActionOutput(self.MIRROR_PORT)]
         inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, action)]
         self.add_flow(datapath, 0, match_empty, inst)
+
 
     #packet in
     @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
