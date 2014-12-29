@@ -25,12 +25,7 @@ class SimpleSwitchRest(adaptivemonitor.AdaptiveMonitor):
     _CONTEXTS = {'wsgi': WSGIApplication}
 
     def __init__(self, *args, **kwargs):
-        #        logging.basicConfig(level=logging.DEBUG,
-        #                            format="[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s",
-        #                            datefmt='%Y%m%d %H:%M:%S')
-
-#        self.logger = logging.getLogger("app.SimpleSwitchRest")
-        self.logger = logging.getLogger()
+        self.logger = logging.getLogger("iiis")
         console = logging.StreamHandler()
         console.setLevel(logging.INFO)
         formatter = logging.Formatter(fmt='[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s',

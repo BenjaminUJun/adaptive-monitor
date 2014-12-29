@@ -19,7 +19,7 @@ class AdaptiveSwitch(app_manager.RyuApp):
 
     def __init__(self, *args, **kwargs):
 
-        self.logger = logging.getLogger()
+        self.logger = logging.getLogger("iiis")
         console = logging.StreamHandler()
         console.setLevel(logging.DEBUG)
         formatter = logging.Formatter('[%(levelname)s %(asctime)s] %(name)s.%(funcName)s %(message)s',
