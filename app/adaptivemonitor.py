@@ -157,7 +157,6 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
         req = parser.OFPFlowStatsRequest(datapath)
         datapath.send_msg(req)
 
-
     @staticmethod
     def _request_port_stats(datapath):
         logging.log(logging.INFO, "[INFO %s] AdaptiveMonitor._request_port_stats datapath = %16x" % (
