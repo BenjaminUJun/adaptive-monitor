@@ -14,7 +14,6 @@ class sendData(multiprocessing.Process):
     def __init__(self, dict_f, interval, outfilepre, myblock):
         multiprocessing.Process.__init__(self)
 
-
         logging.log("")
 
         self.li_flow_count = dict_f
@@ -55,7 +54,6 @@ class sendData(multiprocessing.Process):
                     out.write(obj[0][0] + " " + obj[0][1] + " " + str(obj[1]) + "\n")
                 out.write("\n")
                 out.close()
-                ''' '''
             time.sleep(self.interval)
 
     def stop(self):
@@ -87,6 +85,7 @@ class listenInterface(multiprocessing.Process):
         for ts, pkt in self.pc:
             if not self.process_alive:
                 return
+            #            print pkt
             self.packetscount = self.packetscount + 1
             print "\rpackets captured = %d" % self.packetscount,
             sys.stdout.flush()
@@ -113,7 +112,7 @@ class listenInterface(multiprocessing.Process):
                 else:
                     dport = -1
             self.myblock.acquire()
-            self.flow_count[(src, dst)] = self.flow_count[(src, dst)] + 1 if self.flow_count.has_key((src, dst)) else 1
+            self.flow_count[(src, dst)] = self.flow_count[(src, dst)] + 1 if (src, dst) in self.flow_count else 1
             self.flow_count["pktcountslot"] += 1
             #print "length = %d" % len(self.flow_count)
             self.myblock.release()
