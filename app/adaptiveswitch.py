@@ -89,9 +89,8 @@ class AdaptiveSwitch(app_manager.RyuApp):
         else:
             out_port = ofproto.OFPP_FLOOD
 
-        actions = [parser.OFPActionOutput(out_port)]
-        inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions),
-                parser.OFPActionOutput(self.MIRROR_PORT)]
+        actions = [parser.OFPActionOutput(out_port), parser.OFPActionOutput(self.MIRROR_PORT)]
+        inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS, actions)]
 
         if out_port != ofproto.OFPP_FLOOD:
             match = parser.OFPMatch(in_port=in_port, eth_dst=dst_eth)

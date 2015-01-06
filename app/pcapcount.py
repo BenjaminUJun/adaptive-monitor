@@ -10,20 +10,19 @@ import commands
 import logging
 
 
-class sendData(multiprocessing.Process):
+class SendData(multiprocessing.Process):
     def __init__(self, dict_f, interval, outfilepre, myblock):
         multiprocessing.Process.__init__(self)
-
-        logging.log(logging.INFO, "")
-
+        logging.log(logging.INFO, "[INFO %s] SendData.__init__" % time.strftime("%Y-%m-%d %H:%M:%S"))
         self.li_flow_count = dict_f
         self.interval = interval
         self.outfilepre = outfilepre
         self.myblock = myblock
-        self.threadalive = True
+        self.processalive = True
 
     def run(self):
-        while self.threadalive:
+        logging.log(logging.INFO, "[INFO %s] SendData.run" % time.strftime("%Y-%m-%d %H:%M:%S"))
+        while self.processalive:
             self.myblock.acquire()
             count_length = len(self.li_flow_count)
             self.myblock.release()
@@ -45,7 +44,7 @@ class sendData(multiprocessing.Process):
                     sorted_flow_count[0][1]) + ''.join(
                     ', "' + obj[0][0] + '-' + obj[0][1] + '":' + str(obj[1]) for obj in sorted_flow_count[1:]) + '}'
                 print "rest_str =", rest_str
-                cmd = "curl -X PUT -d '%s' http://10.1.0.121:8080/simpleswitch/statinfo/5e3e089e01a7de53" % rest_str
+                cmd = "curl -X PUT -d '%s' http://10.1.0.122:8080/simpleswitch/statinfo/5e3e089e01a7de53" % rest_str
                 print cmd
                 (status, output) = commands.getstatusoutput(cmd)
                 print "status =", status
@@ -57,11 +56,13 @@ class sendData(multiprocessing.Process):
             time.sleep(self.interval)
 
     def stop(self):
-        self.threadalive = False
+        logging.log(logging.INFO, "[INFO %s] ListenInterface.__init__" % time.strftime("%Y-%m-%d %H:%M:%S"))
+        self.processalive = False
 
 
-class listenInterface(multiprocessing.Process):
+class ListenInterface(multiprocessing.Process):
     def __init__(self, interface, dict_f, myblock):
+        logging.log(logging.INFO, "[INFO %s] ListenInterface.__init__" % time.strftime("%Y-%m-%d %H:%M:%S"))
         multiprocessing.Process.__init__(self)
         self.interface = interface
         self.packetscount = 0
@@ -72,9 +73,11 @@ class listenInterface(multiprocessing.Process):
         self.process_alive = True
 
     def run(self):
+        logging.log(logging.INFO, "[INFO %s] ListenInterface.run" % time.strftime("%Y-%m-%d %H:%M:%S"))
         self.startListen()
 
-    def startListen(self):
+    def start_listen(self):
+        logging.log(logging.INFO, "[INFO %s] ListenInterface.start_listen" % time.strftime("%Y-%m-%d %H:%M:%S"))
         print "start capturing %s . . ." % self.interface
         try:
             self.pc = pcap.pcap(self.interface)
@@ -122,11 +125,12 @@ class listenInterface(multiprocessing.Process):
             self.myblock.release()
 
     def stop(self):
+        logging.log(logging.INFO, "[INFO %s] ListenInterface.stop" % time.strftime("%Y-%m-%d %H:%M:%S"))
         self.process_alive = False
 
 
 class ListenController(multiprocessing.Process):
-    def init(self):
+    def __init__(self):
         multiprocessing.Process.__init__(self)
         self.listen_instance = None
         self.send_instance = None
@@ -137,15 +141,15 @@ class ListenController(multiprocessing.Process):
             dict_f = mgr.dict()
             dict_f["pktcountslot"] = 0
             my_block = multiprocessing.RLock()
-            self.listen_instance = listenInterface("eth3", dict_f, my_block)
+            self.listen_instance = ListenInterface("eth3", dict_f, my_block)
             self.listen_instance.start()
-            self.send_instance = sendData(dict_f, 3, "output", my_block)
+            self.send_instance = SendData(dict_f, 3, "output", my_block)
             self.send_instance.start()
             self.listen_instance.join()
             self.send_instance.join()
             self.listen_instance.stop()
             self.send_instance.stop()
-        except Exception, ex:
+        except Exception:
             print "failed"
             print ex
             return
@@ -156,9 +160,9 @@ class ListenController(multiprocessing.Process):
 
 
 def _exit_clean():
+    time.sleep(3)
     listen.kill_all()
     listen.terminate()
-
 
 global listen
 if __name__ == "__main__":
@@ -168,7 +172,7 @@ if __name__ == "__main__":
     try:
         listen = ListenController()
         listen.start()
-        atexit.register(_exit_clean)
+#        atexit.register(_exit_clean)
         listen.join()
     except Exception as ex:
         print "out from listen:"
