@@ -14,7 +14,7 @@ class sendData(multiprocessing.Process):
     def __init__(self, dict_f, interval, outfilepre, myblock):
         multiprocessing.Process.__init__(self)
 
-        logging.log("")
+        logging.log(logging.INFO, "")
 
         self.li_flow_count = dict_f
         self.interval = interval
