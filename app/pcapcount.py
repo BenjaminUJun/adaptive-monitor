@@ -112,7 +112,11 @@ class listenInterface(multiprocessing.Process):
                 else:
                     dport = -1
             self.myblock.acquire()
-            self.flow_count[(src, dst)] = self.flow_count[(src, dst)] + 1 if (src, dst) in self.flow_count else 1
+            if (src, dst) in self.flow_count:
+                self.flow_count[(src, dst)] = self.flow_count[(src, dst)] + 1
+            else:
+                self.flow_count[(src, dst)] = 1
+#            self.flow_count[(src, dst)] = self.flow_count[(src, dst)] + 1 if (src, dst) in self.flow_count else 1
             self.flow_count["pktcountslot"] += 1
             #print "length = %d" % len(self.flow_count)
             self.myblock.release()
