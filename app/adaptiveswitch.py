@@ -13,7 +13,7 @@ from ryu.lib.packet import packet, ethernet
 
 class AdaptiveSwitch(app_manager.RyuApp):
     OFP_VERSIONS = [ofproto_v1_3.OFP_VERSION]
-    MIRROR_PORT = 25
+    MIRROR_PORT = 4
 
     def __init__(self, *args, **kwargs):
         logging.log(logging.INFO, "[INFO %s] AdaptiveSwitch__init__" % time.strftime("%Y-%m-%d %H:%M:%S"))
