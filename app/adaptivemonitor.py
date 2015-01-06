@@ -167,7 +167,7 @@ class AdaptiveMonitor(adaptiveswitch.AdaptiveSwitch):
         datapath.send_msg(req)
 
     def add_monitor(self, datapath, in_ip, out_ip):
-        if self.ip_to_mac[datapath.id][out_ip] in self.mac_to_port:
+        if out_ip in self.ip_to_mac[datapath.id] and self.ip_to_mac[datapath.id][out_ip] in self.mac_to_port:
             out_port = self.mac_to_port[self.ip_to_mac[datapath.id][out_ip]]
 
         parser = datapath.ofproto_parser
